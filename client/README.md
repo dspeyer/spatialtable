@@ -1,0 +1,1 @@
+The client will be a command line tool implemented as a very thin wrapper around common/client.

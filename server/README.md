@@ -1,0 +1,1 @@
+A server hosts some number of tablets, and accepts =insert=, =query=, =list=, =load=, and =unload= RPCs.  It also splits on its own initiative.

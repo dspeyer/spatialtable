@@ -1,0 +1,1 @@
+A library which performs lookups in the table.  Located in common because it will be used for metadata operations.

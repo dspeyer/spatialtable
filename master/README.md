@@ -1,0 +1,1 @@
+The master is one of the later pieces we will build.  It will keep track of the metametadata tablet, and will monitor the load on the servers.
