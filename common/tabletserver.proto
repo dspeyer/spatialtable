@@ -1,0 +1,58 @@
+message Box {
+  repeated double start = 1;
+  repeated double end = 2;
+}
+
+message Row {
+  required Box box = 1;
+  required string value = 2;
+}
+
+message Table {
+  required string name = 1;
+  required int32 dim = 2;
+}
+
+message Status {
+  enum StatusValues {
+    Success = 0;
+    WrongDimension = 1;
+    NoSuchTablet = 2;
+  }
+  required StatusValues status = 1;
+}
+
+message InsertRequest {
+  required string tablet = 1;
+  required Row data = 2;
+}
+
+
+message QueryRequest {
+  required string tablet = 1;
+  required Box query = 2;
+  required bool is_within = 3;
+}
+
+message QueryResponse {
+  required Status status = 1;
+  repeated Row results = 2;
+}
+
+message ListRequest {}
+
+message TabletDescription {
+  required string name = 1;
+  required int32 dim = 2;
+}
+
+message ListResponse {
+  repeated TabletDescription results = 1;
+}
+
+service TabletServerService {
+  rpc CreateTable(Table) returns(Status);
+  rpc Insert(InsertRequest) returns(Status);
+  rpc Query(QueryRequest) returns(QueryResponse);
+  rpc ListTablets(ListRequest) returns(ListResponse);
+}
