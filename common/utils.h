@@ -57,6 +57,7 @@ std::vector<double> VectorFromPoint(const typename geom<N>::point& pt) {
 struct vecBox {
   std::vector<double> start;
   std::vector<double> end;
+  vecBox(const std::vector<double>& _s, const std::vector<double>& _e) : start(_s), end(_e) {}
   vecBox(std::vector<double>&& _s, std::vector<double>&& _e) : start(_s), end(_e) {}
   vecBox() : start(0), end(0) {}
 };
@@ -66,6 +67,8 @@ vecBox vecBoxFromBox(const typename geom<N>::box& b) {
   vecBox out;
   out.start=VectorFromPoint<N>(b.min_corner());
   out.end=VectorFromPoint<N>(b.max_corner());
+  std::cerr << "Converting " << b.min_corner().template get<0>() << "," << b.max_corner().template get<0>() << " to " << out.start[0] << "," << out.end[0] << "\n";
+  return out;
 }
 
 template<int N>
