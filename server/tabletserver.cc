@@ -94,7 +94,7 @@ class TabletServerServiceImpl : public TabletServerService {
 };
 
 int main() {
-  tabletFactoryInitializer<1>::initialize();
+  tabletFactoryInitializer<8>::initialize();
   rpcz::application application;
   rpcz::server server(application);
   TabletServerServiceImpl tabletserver_service;
