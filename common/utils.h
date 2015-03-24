@@ -71,5 +71,23 @@ typename geom<N>::box boxFromProtoBox(const Box& b) {
   return typename geom<N>::box(s,e);
 }
 
+template<typename POINT>
+double& get(POINT& p, int idx) {
+  double* ptr = const_cast<double*>(&p.get<0>());
+  return ptr[idx];
+}
+
+// It would be better to make this a static_assert, but I can't see a way to do it.
+// This way, at least, if our assumptions about how points are implemented aren't valid, we crash and burn immediately.
+bool sanityCheckPointHack(){
+  geom<8>::point p;
+  const double* ptr0 = &p.get<0>();
+  const double* ptr1 = &p.get<1>();
+  const double* ptr7 = &p.get<7>();
+  assert(ptr1 == ptr0+1);
+  assert(ptr7 == ptr0+7);
+  return true;
+}
+static bool sanityChecked=sanityCheckPointHack();
 
 #endif // _UTILS_H_
