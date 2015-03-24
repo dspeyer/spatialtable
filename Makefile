@@ -27,6 +27,9 @@ stclient: bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
 
 # Server
 
+bin/tablet.o: server/tablet.cc common/gen/tabletserver.pb.h common/utils.h server/tablet.h
+	${COMPILE} -o bin/tablet.o server/tablet.cc
+
 bin/tabletserver.o: server/tabletserver.cc common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h common/utils.h server/tablet.h
 	${COMPILE} -o bin/tabletserver.o server/tabletserver.cc
 
@@ -34,11 +37,11 @@ bin/tablet_test.o: server/tablet_test.cc common/gen/tabletserver.pb.h common/uti
 	${COMPILE} -o bin/tablet_test.o server/tablet_test.cc
 
 
-tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o 
-	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS}
+tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o
+	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o ${LIBS}
 
-tablet_test: bin/tablet_test.o bin/tabletserver.pb.o
-	g++ -g tablet_test bin/tablet_test.o bin/tabletserver.pb.o ${LIBS}
+tablet_test: bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o
+	g++ -g -o tablet_test bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o ${LIBS}
 
 
 # Misc

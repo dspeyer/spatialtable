@@ -6,6 +6,8 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <vector>
+#include <limits>
+
 
 using google::protobuf::RepeatedField;
 
@@ -79,7 +81,7 @@ double& get(POINT& p, int idx) {
 
 // It would be better to make this a static_assert, but I can't see a way to do it.
 // This way, at least, if our assumptions about how points are implemented aren't valid, we crash and burn immediately.
-bool sanityCheckPointHack(){
+static bool sanityCheckPointHack(){
   geom<8>::point p;
   const double* ptr0 = &p.get<0>();
   const double* ptr1 = &p.get<1>();
@@ -89,5 +91,7 @@ bool sanityCheckPointHack(){
   return true;
 }
 static bool sanityChecked=sanityCheckPointHack();
+
+const double Inf = std::numeric_limits<double>::infinity();
 
 #endif // _UTILS_H_

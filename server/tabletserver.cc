@@ -11,33 +11,15 @@ using namespace std;
 
 std::map<string,tablet*> tablets;
 
-typedef tablet* (*TabletFactory)(const std::string&);
-
-TabletFactory tabletFactories[9];
-
-template<int N>
-struct tabletFactoryInitializer {
-  static void initialize() {
-    tabletFactories[N]=(tablet::template New<N>);
-    tabletFactoryInitializer<N-1>::initialize();
-  }
-};
-template<>
-struct tabletFactoryInitializer<0> {
-  static void initialize() {
-  }
-};
-
 class TabletServerServiceImpl : public TabletServerService {
   virtual void CreateTable(const Table& request, rpcz::reply<Status> reply) {
     Status response;
-    int dim = request.dim();
-    if (dim<=0 || dim>=9) {
+    tablet* t = tablet::New(request.name(),request.dim());
+    if (!t) {
       response.set_status(Status::WrongDimension);
       reply.send(response);
       return;
     }
-    tablet* t = tabletFactories[dim](request.name());
     tablets[t->get_name()]=t;
     response.set_status(Status::Success);
     reply.send(response);
@@ -93,13 +75,18 @@ class TabletServerServiceImpl : public TabletServerService {
 
 };
 
-int main() {
-  tabletFactoryInitializer<8>::initialize();
+int main(int argc, char **argv) {
+  string port;
+  if (argc==2) {
+    port = argv[1];
+  } else {
+    port = "5555";
+  }
   rpcz::application application;
   rpcz::server server(application);
   TabletServerServiceImpl tabletserver_service;
   server.register_service(&tabletserver_service);
-  cout << "Serving requests on port 5555." << endl;
-  server.bind("tcp://*:5555");
+  cout << "Serving requests on port " << port << endl;
+  server.bind("tcp://*:"+port);
   application.run();
 }

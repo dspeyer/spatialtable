@@ -4,7 +4,7 @@
 #include <iostream>
 
 int main(){
-  tablet* t = tablet::New<2>("space");
+  tablet* t = tablet::New("space",2);
   Box a,b,q;
   a.add_start(1);
   a.add_start(1);

@@ -30,11 +30,11 @@ class TabletServerService : public rpcz::service {
   inline TabletServerService() {};
  public:
   virtual ~TabletServerService();
-  
+
   typedef TabletServerService_Stub Stub;
-  
+
   static const ::google::protobuf::ServiceDescriptor* descriptor();
-  
+
   virtual void CreateTable(const ::Table& request,
                        ::rpcz::reply< ::Status> response);
   virtual void Insert(const ::InsertRequest& request,
@@ -43,9 +43,9 @@ class TabletServerService : public rpcz::service {
                        ::rpcz::reply< ::QueryResponse> response);
   virtual void ListTablets(const ::ListRequest& request,
                        ::rpcz::reply< ::ListResponse> response);
-  
+
   // implements Service ----------------------------------------------
-  
+
   const ::google::protobuf::ServiceDescriptor* GetDescriptor();
   void call_method(const ::google::protobuf::MethodDescriptor* method,
                   const ::google::protobuf::Message& request,
@@ -67,10 +67,10 @@ class TabletServerService_Stub {
                    const ::std::string& service_name,
                    bool owns_channel=false);
   ~TabletServerService_Stub();
-  
+
   inline ::rpcz::rpc_channel* channel() { return channel_; }
-  
-  
+
+
   void CreateTable(const ::Table& request,
                        ::Status* response,
                        ::rpcz::rpc* rpc,                     ::rpcz::closure* done);
