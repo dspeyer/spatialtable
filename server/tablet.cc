@@ -7,6 +7,7 @@
 #include <string>
 #include "../common/utils.h"
 #include "tablet.h"
+#include "../common/gen/tabletserver.pb.h"
 
 template<int DIM>
 class tabletImpl : public tablet{
@@ -40,7 +41,10 @@ class tabletImpl : public tablet{
   }
 
   tabletImpl(const std::string& _table ) : table(_table) {
-    
+    for (int i=0; i<DIM; i++) {
+      borders.add_start(-Inf);
+      borders.add_end(Inf);
+    }
   }
   
   virtual int get_dim() {
@@ -48,11 +52,11 @@ class tabletImpl : public tablet{
   }
 
   virtual std::string get_name() {
-    return table +"/all";
+    return table + "::" + stringFromBox(borders);
   }
 
  private:
-  box borders; // TODO: do something with this
+  /*protobuf*/ Box borders;
   std::string table;
   boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > rtree;
 };

@@ -4,6 +4,7 @@
 #include <rpcz/rpcz.hpp>
 #include "../common/gen/tabletserver.pb.h"
 #include "../common/gen/tabletserver.rpcz.h"
+#include "../common/utils.h"
 
 using namespace std;
 
@@ -69,11 +70,7 @@ void query(TabletServerService_Stub* stub, int argc, char** argv) {
     if (response.status().status() == Status::Success) {
       cout << "Matching rows are:\n";
       for (int i=0; i<response.results_size(); i++) {
-        cout << "  ";
-        for (int d=0; d<response.results(i).box().start_size(); d++) {
-          cout << response.results(i).box().start(d) << ".." << response.results(i).box().end(d) << " ";
-        }
-        cout << "=> '" << response.results(i).value() << "'\n";
+        cout << "  " << stringFromBox(response.results(i).box()) << "=> '" << response.results(i).value() << "'\n";
       }
     } else {
       cout << "Error: " << Status::StatusValues_Name(response.status().status()) << endl;

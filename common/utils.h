@@ -7,7 +7,7 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <vector>
 #include <limits>
-
+#include <cstdlib>
 
 using google::protobuf::RepeatedField;
 
@@ -93,5 +93,28 @@ static bool sanityCheckPointHack(){
 static bool sanityChecked=sanityCheckPointHack();
 
 const double Inf = std::numeric_limits<double>::infinity();
+
+static std::string stringFromDouble(double d) {
+  if (d==Inf) {
+    return "Inf";
+  } else if (d==-Inf) {
+    return "-Inf";
+  } else {
+    char buf[32];
+    snprintf(buf,32,"%f",d);
+    return buf;
+  }
+}
+
+static std::string stringFromBox(const /*protobuf*/ Box& box) {
+  std::string out = "";
+  for (int d=0; d<box.start_size(); d++) {
+    if (d!=0) out+="_x_";
+    out += stringFromDouble(box.start(d));
+    out += "..";
+    out += stringFromDouble(box.end(d));
+  }
+  return out;
+}
 
 #endif // _UTILS_H_
