@@ -22,24 +22,6 @@ struct alwaysTrue{
   }
 };
 
-/*
-template<typename T>
-struct uint_if { };
-
-template<>
-struct uint_if<boost::true_type> {
-  typedef unsigned int type;
-};
-
-namespace boost {
-  namespace serialization {
-    template<typename ARCHIVE, typename BOX>
-    void serialize(ARCHIVE& ar, BOX & b, typename uint_if<boost::is_same<BOX,typename geom<sizeof(BOX)/(2*sizeof(double))>::box>>::type version){
-      ar << b.min_corner() << b.max_corner();
-    }
-  }
-}
-*/
 
 namespace boost {
 namespace serialization {
