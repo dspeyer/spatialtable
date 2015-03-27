@@ -74,8 +74,8 @@ typename geom<N>::box boxFromProtoBox(const Box& b) {
 }
 
 template<typename POINT>
-double& get(POINT& p, int idx) {
-  double* ptr = const_cast<double*>(&p.get<0>());
+double& getFromPoint(POINT& p, int idx) {
+  double* ptr = const_cast<double*>(&(p.template get<0>()));
   return ptr[idx];
 }
 

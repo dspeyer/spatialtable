@@ -2,15 +2,73 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <vector>
 #include <map>
+#include <fstream>
 #include <string>
 #include "../common/utils.h"
 #include "tablet.h"
 #include "../common/gen/tabletserver.pb.h"
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/type_traits.hpp>
+
+struct alwaysTrue{
+  template<typename T>
+  bool operator()(T t) const{
+    return true;
+  }
+};
+
+/*
+template<typename T>
+struct uint_if { };
+
+template<>
+struct uint_if<boost::true_type> {
+  typedef unsigned int type;
+};
+
+namespace boost {
+  namespace serialization {
+    template<typename ARCHIVE, typename BOX>
+    void serialize(ARCHIVE& ar, BOX & b, typename uint_if<boost::is_same<BOX,typename geom<sizeof(BOX)/(2*sizeof(double))>::box>>::type version){
+      ar << b.min_corner() << b.max_corner();
+    }
+  }
+}
+*/
+
+namespace boost {
+namespace serialization {
+template<typename ARCHIVE, typename POINT>
+void serialize(ARCHIVE& ar, boost::geometry::model::box<POINT>& b, unsigned int version) {
+  const POINT &mi=b.min_corner();
+  const POINT &ma=b.max_corner();
+  int size = sizeof(POINT)/sizeof(double);
+  for (int i=0; i<size; i++) {
+    ar << getFromPoint(mi,i);
+  }
+  for (int i=0; i<size; i++) {
+    ar << getFromPoint(ma,i);
+  }
+}
+}
+}
 
 template<int DIM>
 class tabletImpl : public tablet{
+ friend class boost::serialization::access;
+ template<class Archive>
+ void serialize(Archive &ar, const unsigned int version)
+{
+  ar << table;
+  ar << rtree;
+  ar << borders;
+}
+
  public:
   typedef typename geom<DIM>::point point;
   typedef typename geom<DIM>::box box;
@@ -55,6 +113,15 @@ class tabletImpl : public tablet{
     return table + "::" + stringFromBox(borders);
   }
 
+ virtual void save(){
+  std::ofstream ofs("testFile");
+  boost::archive::text_oarchive oa(ofs);
+  std::vector<value> v;
+  rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
+  oa << v;
+ 
+ }
+
  private:
   /*protobuf*/ Box borders;
   std::string table;
@@ -83,6 +150,7 @@ struct tabletFactoryInitializer<0> {
 };
 
 static bool initializeTabletFactories = tabletFactoryInitializer<nFactories>::initialize();
+
 
 /*static*/ tablet* tablet::New(const std::string& table, int dim) {
   if (dim<=0 || dim>nFactories) {

@@ -27,4 +27,5 @@ int main(){
     Row* r = resp.mutable_results(i);
     std::cout << r->box().start(0) << ".." << r->box().end(0) << " x " << r->box().start(1) << ".." << r->box().end(1) << " = " << r->value() << std::endl;
   }
+ t->save();
 }
