@@ -33,15 +33,26 @@ class TabletServerServiceImpl : public TabletServerService {
       reply.send(response);
       return;
     }
-    int dim = it->second->get_dim();
+    tablet *t = it->second;
+    int dim = t->get_dim();
     if (request.data().box().start_size()!=dim || request.data().box().end_size()!=dim) {
       response.set_status(Status::WrongDimension);
       reply.send(response);
       return;
     }
-    it->second->insert(request.data().box(), request.data().value());
+    t->insert(request.data().box(), request.data().value());
     response.set_status(Status::Success);
     reply.send(response);
+    if (t->get_size()>10) {
+      std::vector<tablet*> newt = t->split();
+      if (newt.size()>0) {
+	tablets.erase(it);
+	for (tablet* i : newt) {
+	  tablets[i->get_name()] = i;
+	}
+	delete t;
+      }
+    }
   }
 
   virtual void Remove(const RemoveRequest& request, rpcz::reply<Status> reply) {

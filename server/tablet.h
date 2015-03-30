@@ -11,8 +11,11 @@ class tablet {
   virtual void insert(const /*protobuf*/ Box& k, const std::string& v) = 0;
   virtual bool remove(const /*protobuf*/ Box&) = 0;
   virtual void save() = 0;
+  virtual int get_size() = 0;
   virtual int get_dim() = 0;
+  virtual std::vector<tablet*> split() = 0;
   virtual std::string get_name() = 0;
+  virtual ~tablet() {}
 };
 
 #endif //_TABLET_H_

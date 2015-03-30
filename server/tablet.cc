@@ -4,10 +4,13 @@
 #include <boost/geometry/index/rtree.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include <cstdlib>
 #include <vector>
+#include <utility>
 #include <map>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include "../common/utils.h"
 #include "tablet.h"
 #include "../common/gen/tabletserver.pb.h"
@@ -103,12 +106,72 @@ class tabletImpl : public tablet{
     }
   }
   
+  tabletImpl(const tabletImpl<DIM>* old) : table(old->table) {
+    borders.CopyFrom(old->borders);
+    center_lines = old->center_lines;
+  }
+
   virtual int get_dim() {
     return DIM;
   }
 
+  virtual int get_size() {
+    return rtree.size();
+  }
+
+  virtual std::vector<tablet*> split() {
+    box bound = rtree.bounds();
+    int bestdim=-1;
+    double cut;
+    double widest=-1;
+    for (int i=0; i<DIM; i++) {
+      bool already_crossing=false;
+      for (auto &line : center_lines) {
+	if (line.first == i) {
+	  already_crossing = true;
+	  break;
+	}
+      }
+      if (already_crossing) {
+	continue;
+      }
+      double width = getFromPoint(bound.max_corner(),i)-getFromPoint(bound.min_corner(),i);
+      if (width>widest) {
+	bestdim=i;
+	widest=width;
+	cut=(getFromPoint(bound.max_corner(),i)+getFromPoint(bound.min_corner(),i))/2;
+      }
+    }
+    if (bestdim==-1) return {};
+    tabletImpl<DIM> *less, *cross, *more;
+    less = new tabletImpl<DIM>(this);
+    less->borders.set_end(bestdim,cut);
+    cross = new tabletImpl<DIM>(this);
+    cross->center_lines.push_back(std::make_pair(bestdim,cut));
+    more = new tabletImpl<DIM>(this);
+    more->borders.set_start(bestdim,cut);
+    std::vector<value> v;
+    rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
+    for (auto& i : v) {
+      if (getFromPoint(i.first.max_corner(),bestdim)<cut) {
+	less->rtree.insert(i);
+      } else if (getFromPoint(i.first.min_corner(),bestdim)>cut) {
+	more->rtree.insert(i);
+      } else {
+	cross->rtree.insert(i);
+      }
+    }
+    return {less, cross, more};
+  }
+
   virtual std::string get_name() {
-    return table + "::" + stringFromBox(borders);
+    std::stringstream out;
+    out << table << "::"  << stringFromBox(borders);
+    for (int i=0; i<center_lines.size(); i++) {
+      out << ((i==0) ? "::" : ",");
+      out << center_lines[i].first;
+    }
+    return out.str();
   }
 
  virtual void save(){
@@ -123,6 +186,7 @@ class tabletImpl : public tablet{
  private:
   /*protobuf*/ Box borders;
   std::string table;
+  std::vector<std::pair<int,double>> center_lines;
   boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > rtree;
 };
 
@@ -139,6 +203,7 @@ struct tabletFactoryInitializer {
   static bool initialize() {
     tabletFactories[N-1]=(New);
     tabletFactoryInitializer<N-1>::initialize();
+    return true;
   }
 };
 template<>
