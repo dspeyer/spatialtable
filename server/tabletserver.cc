@@ -44,6 +44,30 @@ class TabletServerServiceImpl : public TabletServerService {
     reply.send(response);
   }
 
+  virtual void Remove(const RemoveRequest& request, rpcz::reply<Status> reply) {
+    Status response;
+    auto it = tablets.find(request.tablet());
+    if (it==tablets.end()) {
+      response.set_status(Status::NoSuchTablet);
+      reply.send(response);
+      return;
+    }
+    int dim = it->second->get_dim();
+    if (request.key().start_size()!=dim || request.key().end_size()!=dim) {
+      response.set_status(Status::WrongDimension);
+      reply.send(response);
+      return;
+    }
+    bool result = it->second->remove(request.key());
+    
+    if (result) {
+      response.set_status(Status::Success);
+    } else {
+      response.set_status(Status::NoSuchRow);
+    }
+    reply.send(response);
+  }
+
   virtual void Query(const QueryRequest& request, rpcz::reply<QueryResponse> reply) {
     QueryResponse response;
     auto it = tablets.find(request.tablet());

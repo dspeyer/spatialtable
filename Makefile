@@ -1,4 +1,4 @@
-COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0
+COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -DBOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL
 LIBS = -lrpcz -lprotobuf -lboost_system -lboost_serialization
 
 all: tabletserver stclient

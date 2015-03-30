@@ -117,4 +117,16 @@ static std::string stringFromBox(const /*protobuf*/ Box& box) {
   return out;
 }
 
+template<typename POINT>
+bool operator==(const boost::geometry::model::box<POINT>& b1,
+		const boost::geometry::model::box<POINT>& b2) {
+  return std::memcmp(&b1,&b2,sizeof(b1))==0;
+}
+
+template<typename POINT>
+bool operator!=(const boost::geometry::model::box<POINT>& b1, 
+		const boost::geometry::model::box<POINT>& b2) {
+  return std::memcmp(&b1,&b2,sizeof(b1))!=0;
+}
+
 #endif // _UTILS_H_

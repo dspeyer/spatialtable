@@ -47,6 +47,30 @@ void insert(TabletServerService_Stub* stub, int argc, char** argv) {
   }
 }
 
+void remove(TabletServerService_Stub* stub, int argc, char** argv) {
+  RemoveRequest request;
+  Status response;
+  if (argc<3 || argc%2==0) {
+    cout << "Usage: insert tablet start_0 end_0 start_1 end_1...\n";
+    return;
+  }
+  request.set_tablet(argv[0]);
+  for (int i=1; i<argc-1; i+=2) {
+    request.mutable_key()->add_start(atof(argv[i]));
+    request.mutable_key()->add_end(atof(argv[i+1]));
+  }
+  try {
+    stub->Remove(request, &response, 1000);
+    if (response.status() == Status::Success) {
+      cout << "...Success!\n";
+    } else {
+      cout << "...error: " << Status::StatusValues_Name(response.status()) << endl;
+    }
+  } catch (rpcz::rpc_error &e) {
+    cout << "Error: " << e.what() << endl;;
+  }
+}
+
 void query(TabletServerService_Stub* stub, int argc, char** argv) {
   if (argc<4 || argc%2) {
     cout << "Usage: query tablet [within|intersect] start_0 end_0 start_1 end_1...\n";
@@ -108,6 +132,7 @@ typedef void (*callback) (TabletServerService_Stub*, int, char**);
 map<string, callback> ops = {
   {"list", list_tablets},
   {"insert", insert},
+  {"remove", remove},
   {"query", query},
   {"create", create}
 };

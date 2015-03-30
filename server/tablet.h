@@ -9,6 +9,7 @@ class tablet {
   static tablet* New(const std::string& _table, int dim);
   virtual void query(const /*protobuf*/ Box& q, bool is_within, QueryResponse& out) = 0;
   virtual void insert(const /*protobuf*/ Box& k, const std::string& v) = 0;
+  virtual bool remove(const /*protobuf*/ Box&) = 0;
   virtual void save() = 0;
   virtual int get_dim() = 0;
   virtual std::string get_name() = 0;

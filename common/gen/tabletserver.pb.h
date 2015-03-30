@@ -37,6 +37,7 @@ class Row;
 class Table;
 class Status;
 class InsertRequest;
+class RemoveRequest;
 class QueryRequest;
 class QueryResponse;
 class ListRequest;
@@ -46,11 +47,12 @@ class ListResponse;
 enum Status_StatusValues {
   Status_StatusValues_Success = 0,
   Status_StatusValues_WrongDimension = 1,
-  Status_StatusValues_NoSuchTablet = 2
+  Status_StatusValues_NoSuchTablet = 2,
+  Status_StatusValues_NoSuchRow = 3
 };
 bool Status_StatusValues_IsValid(int value);
 const Status_StatusValues Status_StatusValues_StatusValues_MIN = Status_StatusValues_Success;
-const Status_StatusValues Status_StatusValues_StatusValues_MAX = Status_StatusValues_NoSuchTablet;
+const Status_StatusValues Status_StatusValues_StatusValues_MAX = Status_StatusValues_NoSuchRow;
 const int Status_StatusValues_StatusValues_ARRAYSIZE = Status_StatusValues_StatusValues_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Status_StatusValues_descriptor();
@@ -415,6 +417,7 @@ class Status : public ::google::protobuf::Message {
   static const StatusValues Success = Status_StatusValues_Success;
   static const StatusValues WrongDimension = Status_StatusValues_WrongDimension;
   static const StatusValues NoSuchTablet = Status_StatusValues_NoSuchTablet;
+  static const StatusValues NoSuchRow = Status_StatusValues_NoSuchRow;
   static inline bool StatusValues_IsValid(int value) {
     return Status_StatusValues_IsValid(value);
   }
@@ -562,6 +565,105 @@ class InsertRequest : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static InsertRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RemoveRequest : public ::google::protobuf::Message {
+ public:
+  RemoveRequest();
+  virtual ~RemoveRequest();
+
+  RemoveRequest(const RemoveRequest& from);
+
+  inline RemoveRequest& operator=(const RemoveRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RemoveRequest& default_instance();
+
+  void Swap(RemoveRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  RemoveRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RemoveRequest& from);
+  void MergeFrom(const RemoveRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string tablet = 1;
+  inline bool has_tablet() const;
+  inline void clear_tablet();
+  static const int kTabletFieldNumber = 1;
+  inline const ::std::string& tablet() const;
+  inline void set_tablet(const ::std::string& value);
+  inline void set_tablet(const char* value);
+  inline void set_tablet(const char* value, size_t size);
+  inline ::std::string* mutable_tablet();
+  inline ::std::string* release_tablet();
+  inline void set_allocated_tablet(::std::string* tablet);
+
+  // required .Box key = 2;
+  inline bool has_key() const;
+  inline void clear_key();
+  static const int kKeyFieldNumber = 2;
+  inline const ::Box& key() const;
+  inline ::Box* mutable_key();
+  inline ::Box* release_key();
+  inline void set_allocated_key(::Box* key);
+
+  // @@protoc_insertion_point(class_scope:RemoveRequest)
+ private:
+  inline void set_has_tablet();
+  inline void clear_has_tablet();
+  inline void set_has_key();
+  inline void clear_has_key();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* tablet_;
+  ::Box* key_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_tabletserver_2eproto();
+  friend void protobuf_AssignDesc_tabletserver_2eproto();
+  friend void protobuf_ShutdownFile_tabletserver_2eproto();
+
+  void InitAsDefaultInstance();
+  static RemoveRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1424,6 +1526,118 @@ inline void InsertRequest::set_allocated_data(::Row* data) {
     set_has_data();
   } else {
     clear_has_data();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// RemoveRequest
+
+// required string tablet = 1;
+inline bool RemoveRequest::has_tablet() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RemoveRequest::set_has_tablet() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RemoveRequest::clear_has_tablet() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RemoveRequest::clear_tablet() {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    tablet_->clear();
+  }
+  clear_has_tablet();
+}
+inline const ::std::string& RemoveRequest::tablet() const {
+  return *tablet_;
+}
+inline void RemoveRequest::set_tablet(const ::std::string& value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void RemoveRequest::set_tablet(const char* value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void RemoveRequest::set_tablet(const char* value, size_t size) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* RemoveRequest::mutable_tablet() {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  return tablet_;
+}
+inline ::std::string* RemoveRequest::release_tablet() {
+  clear_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tablet_;
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void RemoveRequest::set_allocated_tablet(::std::string* tablet) {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    delete tablet_;
+  }
+  if (tablet) {
+    set_has_tablet();
+    tablet_ = tablet;
+  } else {
+    clear_has_tablet();
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required .Box key = 2;
+inline bool RemoveRequest::has_key() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RemoveRequest::set_has_key() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RemoveRequest::clear_has_key() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RemoveRequest::clear_key() {
+  if (key_ != NULL) key_->::Box::Clear();
+  clear_has_key();
+}
+inline const ::Box& RemoveRequest::key() const {
+  return key_ != NULL ? *key_ : *default_instance_->key_;
+}
+inline ::Box* RemoveRequest::mutable_key() {
+  set_has_key();
+  if (key_ == NULL) key_ = new ::Box;
+  return key_;
+}
+inline ::Box* RemoveRequest::release_key() {
+  clear_has_key();
+  ::Box* temp = key_;
+  key_ = NULL;
+  return temp;
+}
+inline void RemoveRequest::set_allocated_key(::Box* key) {
+  delete key_;
+  key_ = key;
+  if (key) {
+    set_has_key();
+  } else {
+    clear_has_key();
   }
 }
 

@@ -80,6 +80,22 @@ class tabletImpl : public tablet{
     rtree.insert(make_pair(boxFromProtoBox<DIM>(k),v));
   }
 
+  virtual bool remove(const /*protobuf*/ Box& q) {
+    assert(q.start().size()==DIM && q.end().size()==DIM);
+    box qb = boxFromProtoBox<DIM>(q);
+    std::vector<value> res;
+    rtree.query(boost::geometry::index::covered_by(qb) &&
+		boost::geometry::index::covers(qb),
+		std::back_inserter(res));
+    for (value& i : res) {
+      if (qb==i.first) {
+	rtree.remove(i);
+	return true;
+      }
+    }
+    return false;
+  }
+
   tabletImpl(const std::string& _table ) : table(_table) {
     for (int i=0; i<DIM; i++) {
       borders.add_start(-Inf);
