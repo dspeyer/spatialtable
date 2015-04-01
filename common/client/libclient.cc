@@ -59,54 +59,67 @@ Status::StatusValues TableStub::Remove(const Box& b, int layer) {
   }
 }
 
+TabletInfo tabletInfoFromStatus(Status::StatusValues status) {
+  TabletInfo out;
+  out.mutable_status()->set_status(status);  
+  return out;
+}
 
 TabletInfo TableStub::findTabletWithBox(const Box& b, int layer) {
-  TabletInfo out;
-  out.set_name("md0::"+table);
-  out.set_server("localhost:5555"); // TODO: fixme  
-  for (int curlayer=0; curlayer<layer; curlayer++) {
-    TabletServerService_Stub* stub=getStub(out.server());
+  TabletInfo md0;
+  md0.set_server("localhost:5555"); // FIXME
+  md0.set_name("md0::"+table);
+  return findTabletWithBox(b, layer, md0);
+}
+
+TabletInfo TableStub::findTabletWithBox(const Box& b, int layer, TabletInfo in) {
+  //  std::cerr << "looking for " << stringFromBox(b) << "  in " << in.name() << std::endl;
+  if (layer>0) {
+    TabletServerService_Stub* stub=getStub(in.server());
     QueryRequest request;
     QueryResponse response;
-    request.set_tablet(out.name());
+    request.set_tablet(in.name());
     request.set_is_within(false);
     request.mutable_query()->CopyFrom(b);
     try {
       stub->Query(request, &response, 1000);
     } catch (rpcz::rpc_error &e) {
-      out.mutable_status()->set_status(Status::ServerDown);
-      return out;
+      return tabletInfoFromStatus(Status::ServerDown);
     }
     if (response.status().status() != Status::Success) {
-      out.mutable_status()->set_status(response.status().status());
-      return out;
+      return tabletInfoFromStatus(response.status().status());
     }
     bool found=false;
     for (int i=0; i<response.results_size(); i++) {
       Row *r = response.mutable_results(i);
-      out.ParseFromString(r->value());
-      if (!is_within(r->box(), b)){
-	continue;
-      }
-      bool failsCrossing=false;
-      for (int i=0; i<out.must_cross_dims_size(); i++) {
-	int dim = out.must_cross_dims(i);
-	double val = out.must_cross_vals(i);
-	if (b.end(dim)<val || b.start(dim)>val) {
-	  failsCrossing=true;
-	  break;
+      TabletInfo ti,res;
+      ti.ParseFromString(r->value());
+      if (is_within(r->box(), b)){
+	res=findTabletWithBox(b, layer-1, ti);
+	if (res.status().status()==Status::Success) {
+	  return res;
 	}
       }
-      if (!failsCrossing) {
-	found=true;
+    }
+    return tabletInfoFromStatus(Status::CouldNotFindTablet);
+  } else {
+    bool failsCrossing=false;
+    //    std::cerr << "contemplating " << in.name() << " as a place to find " << stringFromBox(b) << std::endl;
+    for (int i=0; i<in.must_cross_dims_size(); i++) {
+      int dim = in.must_cross_dims(i);
+      double val = in.must_cross_vals(i);
+      if (b.end(dim)<=val || b.start(dim)>=val) {
+	//	std::cerr << "...fails to cross " << dim << "=" << val << std::endl;
+	failsCrossing=true;
 	break;
       }
     }
-    if (!found) {
-      out.mutable_status()->set_status(Status::CouldNotFindTablet);
-      return out;
+    if (!failsCrossing) {
+      //      std::cerr << "...crosses\n";
+      in.mutable_status()->set_status(Status::Success);
+      return in;
+    } else {
+      return tabletInfoFromStatus(Status::CouldNotFindTablet);
     }
   }
-  out.mutable_status()->set_status(Status::Success);
-  return out;
 }

@@ -14,6 +14,7 @@ class TableStub {
   Status::StatusValues Insert(const Box& b, const std::string& value, int layer);
   Status::StatusValues Remove(const Box& b, int layer);
  private:
+  TabletInfo findTabletWithBox(const Box& b, int layer, TabletInfo in);
   TabletInfo findTabletWithBox(const Box& b, int layer);
   TabletServerService_Stub* getStub(const std::string& server);
   std::string table;

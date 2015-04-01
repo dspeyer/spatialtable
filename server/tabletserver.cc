@@ -64,22 +64,27 @@ class TabletServerServiceImpl : public TabletServerService {
       return;
     }
     t->insert(request.data().box(), request.data().value());
-    response.set_status(Status::Success);
-    reply.send(response);
     if (t->get_size()>10 && t->get_layer()>0) {
       std::vector<tablet*> newt = t->split();
       if (newt.size()>0) {
 	TableStub stub(t->get_table(),application);
 	auto status = stub.Remove(t->get_borders(), t->get_layer()-1);
-	assert(status==Status::Success);
+	if (status!=Status::Success) {
+	  std::cerr << "Failed to remove old " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
+	}
 	tablets.erase(it);
 	for (unsigned int i=0; i<newt.size(); i++) {
 	  tablets[newt[i]->get_name()] = newt[i];
 	  status = stub.Insert(newt[i]->get_borders(), tablet_description(newt[i]), newt[i]->get_layer()-1);
+	  if (status!=Status::Success) {
+	    std::cerr << "Failed to insert " << newt[i]->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
+	  }
 	}
 	delete t;
       }
     }
+    response.set_status(Status::Success);
+    reply.send(response);
   }
   
   virtual void Remove(const RemoveRequest& request, rpcz::reply<Status> reply) {

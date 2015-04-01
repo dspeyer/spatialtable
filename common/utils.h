@@ -118,6 +118,18 @@ static std::string stringFromBox(const /*protobuf*/ Box& box) {
 }
 
 template<typename POINT>
+std::string stringFromBox(const boost::geometry::model::box<POINT>& b) {
+  std::string out = "";
+  for (int d=0; d<sizeof(POINT)/sizeof(double); d++) {
+    if (d!=0) out+="_x_";
+    out += stringFromDouble(getFromPoint(b.min_corner(),d));
+    out += "..";
+    out += stringFromDouble(getFromPoint(b.max_corner(),d));
+  }
+  return out;
+}
+
+template<typename POINT>
 bool operator==(const boost::geometry::model::box<POINT>& b1,
 		const boost::geometry::model::box<POINT>& b2) {
   return std::memcmp(&b1,&b2,sizeof(b1))==0;

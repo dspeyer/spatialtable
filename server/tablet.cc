@@ -159,10 +159,21 @@ class tabletImpl : public tablet{
 	cut = 0;
       } else {
 	std::sort(vals.begin(), vals.end());
-	cut=vals[vals.size()/2];
+	if (vals[0]!=vals[vals.size()-1]) {
+	  int firstnb, lastnb;
+	  for (firstnb=0; vals[firstnb]==vals[0]; firstnb++);
+	  for (lastnb=vals.size()-1; vals[lastnb]==vals[vals.size()-1]; lastnb--);
+	  if (vals[lastnb]==vals[0]) { // only two values
+	    cut = (vals[firstnb]+vals[lastnb])/2;
+	  } else {
+	    cut=vals[(firstnb+lastnb)/2];
+	  }
+	} else {
+	  cut=vals[0];
+	}
       }
     }
-    std::cout << "splitting " << get_name() << " at dim[" << bestdim << "]=" << cut << std::endl;
+    //    std::cerr << "splitting " << get_name() << " at " << bestdim << "=" << cut << std::endl;
     tabletImpl<DIM> *less, *cross, *more;
     less = new tabletImpl<DIM>(this);
     less->borders.set_end(bestdim,cut);
@@ -180,7 +191,6 @@ class tabletImpl : public tablet{
       }
     }
     std::vector<tablet*> out = {less, cross, more};
-    std::cout << "split succeeded\n";
     return out;
   }
 
