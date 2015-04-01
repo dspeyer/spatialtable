@@ -129,4 +129,16 @@ bool operator!=(const boost::geometry::model::box<POINT>& b1,
   return std::memcmp(&b1,&b2,sizeof(b1))!=0;
 }
 
+static bool is_within(const Box& bigger, const Box& smaller) {
+  if (bigger.start_size()!=bigger.end_size() || bigger.start_size()!=smaller.start_size() ||bigger.start_size()!=smaller.end_size()) {
+    return false;
+  }
+  for (int i=0; i<bigger.start_size(); i++) {
+    if (bigger.start(i)>smaller.start(i) || bigger.end(i)<smaller.end(i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 #endif // _UTILS_H_

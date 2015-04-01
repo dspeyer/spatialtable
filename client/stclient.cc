@@ -5,6 +5,7 @@
 #include "../common/gen/tabletserver.pb.h"
 #include "../common/gen/tabletserver.rpcz.h"
 #include "../common/utils.h"
+#include "../common/client/libclient.h"
 
 using namespace std;
 
@@ -45,6 +46,54 @@ void insert(TabletServerService_Stub* stub, int argc, char** argv) {
   } catch (rpcz::rpc_error &e) {
     cout << "Error: " << e.what() << endl;;
   }
+}
+
+void tableInsert(TableStub* stub, int argc, char** argv) {
+  if (argc<3 || argc%2==0) {
+    cout << "Usage: insert tablet value start_0 end_0 start_1 end_1...\n";
+    return;
+  }
+  string value=argv[0];
+  Box box;
+  for (int i=1; i<argc-1; i+=2) {
+    box.add_start(atof(argv[i]));
+    box.add_end(atof(argv[i+1]));
+  }
+  Status::StatusValues response = stub->Insert(box, value, 2);
+  cout << Status::StatusValues_Name(response) << endl;
+}
+
+void tableMultiInsert(TableStub* stub, int argc, char** argv) {
+  if (argc<3 || argc%2==0) {
+    cout << "Usage: insert tablet value start_0 end_0 start_1 end_1...\n";
+    return;
+  }
+  string value=argv[0];
+  Box box;
+  for (int i=1; i<argc-1; i+=2) {
+    box.add_start(atof(argv[i]));
+    box.add_end(atof(argv[i+1]));
+  }
+  for (int i=0; i<5; i++) {
+    Status::StatusValues response = stub->Insert(box, value, 2);
+    cout << Status::StatusValues_Name(response) << endl;
+    box.set_start(0, box.start(0)+10);
+    box.set_end(0, box.end(0)+10);
+  }
+}
+
+void tableRemove(TableStub* stub, int argc, char** argv) {
+  if (argc<2 || argc%2) {
+    cout << "Usage: insert tablet value start_0 end_0 start_1 end_1...\n";
+    return;
+  }
+  Box box;
+  for (int i=0; i<argc-1; i+=2) {
+    box.add_start(atof(argv[i]));
+    box.add_end(atof(argv[i+1]));
+  }
+  Status::StatusValues response = stub->Remove(box, 2);
+  cout << Status::StatusValues_Name(response) << endl;
 }
 
 void remove(TabletServerService_Stub* stub, int argc, char** argv) {
@@ -129,43 +178,44 @@ void create(TabletServerService_Stub* stub, int argc, char** argv) {
 
 typedef void (*callback) (TabletServerService_Stub*, int, char**);
 
-map<string, callback> ops = {
-  {"list", list_tablets},
-  {"insert", insert},
-  {"remove", remove},
-  {"query", query},
-  {"create", create}
+map<string, callback> dbgops = {
+  {"dbglist", list_tablets},
+  {"dbginsert", insert},
+  {"dbgremove", remove},
+  {"dbgquery", query},
+  {"dbgcreate", create}
 };
 
+typedef void (*callbackTable) (TableStub*, int, char**);
+
+map<string, callbackTable> ops = {
+  {"insert", tableInsert},
+  {"multiinsert", tableMultiInsert},
+  {"remove", tableRemove}
+};
 
 int main(int argc, char ** argv) {
   if (argc<3) {
-    cout << "Usage: \n  ./client serverhost:serverport command <args>\n  commands are:\n";
+    cout << "Usage: \n  ./client command serverhost:serverport|table <args>\n  commands are:\n";
     for (auto i : ops) {
       cout << "    " << i.first << "\n";
     }
     return 1;
   }
-  string server = argv[1];
-  rpcz::application application;
-  TabletServerService_Stub stub(application.create_rpc_channel("tcp://"+server), true);
 
-  callback cb = ops[argv[2]];
+  callback cb = dbgops[argv[1]];
+  callbackTable cb2 = ops[argv[1]];
+  rpcz::application application;
   if (cb) {
+    string server = argv[2];
+    TabletServerService_Stub stub(application.create_rpc_channel("tcp://"+server), true);
     cb(&stub, argc-3, argv+3);
+  } else if (cb2) {
+    TableStub stub(argv[2], &application);
+    cb2(&stub, argc-3, argv+3);
   } else {
-    cout << "Unknown command: " << argv[2] << "\n";
+    cout << "Unknown command: " << argv[1] << "\n";
   }
 
-  /*  SearchRequest request;
-  SearchResponse response;
-  request.set_query("gold");
 
-  cout << "Sending request." << endl;
-  try {
-    search_stub.Search(request, &response, 1000);
-    cout << response.DebugString() << endl;
-  } catch (rpcz::rpc_error &e) {
-    cout << "Error: " << e.what() << endl;;
-    }*/
 }

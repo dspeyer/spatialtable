@@ -99,16 +99,16 @@ class tabletImpl : public tablet{
     return false;
   }
 
-  tabletImpl(const std::string& _table ) : table(_table) {
+  tabletImpl(const std::string& _table, int _layer) : table(_table), layer(_layer) {
     for (int i=0; i<DIM; i++) {
       borders.add_start(-Inf);
       borders.add_end(Inf);
     }
   }
   
-  tabletImpl(const tabletImpl<DIM>* old) : table(old->table) {
+  tabletImpl(const tabletImpl<DIM>* old) : table(old->table), layer(old->layer) {
     borders.CopyFrom(old->borders);
-    center_lines = old->center_lines;
+    must_cross = old->must_cross;
   }
 
   virtual int get_dim() {
@@ -126,7 +126,7 @@ class tabletImpl : public tablet{
     double widest=-1;
     for (int i=0; i<DIM; i++) {
       bool already_crossing=false;
-      for (auto &line : center_lines) {
+      for (auto &line : must_cross) {
 	if (line.first == i) {
 	  already_crossing = true;
 	  break;
@@ -143,11 +143,12 @@ class tabletImpl : public tablet{
       }
     }
     if (bestdim==-1) return {};
+    std::cout << "splitting " << get_name() << " at dim[" << bestdim << "]=" << cut << std::endl;
     tabletImpl<DIM> *less, *cross, *more;
     less = new tabletImpl<DIM>(this);
     less->borders.set_end(bestdim,cut);
     cross = new tabletImpl<DIM>(this);
-    cross->center_lines.push_back(std::make_pair(bestdim,cut));
+    cross->must_cross.push_back(std::make_pair(bestdim,cut));
     more = new tabletImpl<DIM>(this);
     more->borders.set_start(bestdim,cut);
     std::vector<value> v;
@@ -161,15 +162,25 @@ class tabletImpl : public tablet{
 	cross->rtree.insert(i);
       }
     }
-    return {less, cross, more};
+    std::vector<tablet*> out = {less, cross, more};
+    std::cout << "split succeeded\n";
+    return out;
   }
 
   virtual std::string get_name() {
     std::stringstream out;
-    out << table << "::"  << stringFromBox(borders);
-    for (int i=0; i<center_lines.size(); i++) {
-      out << ((i==0) ? "::" : ",");
-      out << center_lines[i].first;
+    if (layer==0) {
+      out << "md0::";
+    } else if (layer==1) {
+      out << "metadata::";
+    }
+    out << table;
+    if (layer==0) {
+      return out.str();
+    }
+    out << "::"  << stringFromBox(borders);
+    for (int i=0; i<must_cross.size(); i++) {
+      out << ((i==0) ? "::" : ",") << must_cross[i].first;
     }
     return out.str();
   }
@@ -180,25 +191,45 @@ class tabletImpl : public tablet{
   std::vector<value> v;
   rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
   oa << v;
- 
- }
+  }
+
+  virtual void mostly_fill_tabletinfo(TabletInfo* ti) {
+    ti->set_name(get_name());
+    for (auto& cross : must_cross) {
+      ti->add_must_cross_dims(cross.first);
+      ti->add_must_cross_vals(cross.second);
+    }
+  }
+
+  virtual const /*protobuf*/ Box& get_borders() {
+    return borders;
+  }
+
+  virtual std::string get_table() {
+    return table;
+  }
+
+  virtual int get_layer() {
+    return layer;
+  }
 
  private:
   /*protobuf*/ Box borders;
   std::string table;
-  std::vector<std::pair<int,double>> center_lines;
+  int layer;
+  std::vector<std::pair<int,double>> must_cross;
   boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > rtree;
 };
 
-typedef tablet* (*TabletFactory)(const std::string&);
+typedef tablet* (*TabletFactory)(const std::string&, int layer);
 
 static const int nFactories = 8;
 static TabletFactory tabletFactories[nFactories];
 
 template<int N>
 struct tabletFactoryInitializer {
-  static tablet* New(const std::string& table) {
-    return new tabletImpl<N>(table);
+  static tablet* New(const std::string& table, int layer) {
+    return new tabletImpl<N>(table, layer);
   }
   static bool initialize() {
     tabletFactories[N-1]=(New);
@@ -215,10 +246,10 @@ struct tabletFactoryInitializer<0> {
 static bool initializeTabletFactories = tabletFactoryInitializer<nFactories>::initialize();
 
 
-/*static*/ tablet* tablet::New(const std::string& table, int dim) {
-  if (dim<=0 || dim>nFactories) {
+/*static*/ tablet* tablet::New(const std::string& table, int dim, int layer) {
+  if (dim<=0 || dim>nFactories || layer<0 || layer>2) {
     return NULL;
   } else {
-    return tabletFactories[dim-1](table);
+    return tabletFactories[dim-1](table,layer);
   }
 }

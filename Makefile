@@ -1,4 +1,4 @@
-COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -DBOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL -Wall -Wno-unused-variable
+COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -DBOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL -Wall -Wno-unused-variable -Wno-unused-function
 LIBS = -lrpcz -lprotobuf -lboost_system -lboost_serialization
 
 all: tabletserver stclient
@@ -17,13 +17,16 @@ bin/tabletserver.pb.o: common/gen/tabletserver.pb.cc common/gen/tabletserver.pb.
 bin/tabletserver.rpcz.o: common/gen/tabletserver.rpcz.cc common/gen/tabletserver.rpcz.h common/gen/tabletserver.pb.h
 	${COMPILE} -o bin/tabletserver.rpcz.o common/gen/tabletserver.rpcz.cc
 
+bin/libclient.o:  common/gen/tabletserver.rpcz.h common/gen/tabletserver.pb.h common/client/libclient.h common/client/libclient.cc common/utils.h
+	${COMPILE} -o bin/libclient.o common/client/libclient.cc
+
 # Client
 
-bin/stclient.o: client/stclient.cc common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h
+bin/stclient.o: client/stclient.cc common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h common/client/libclient.h
 	${COMPILE} -o bin/stclient.o client/stclient.cc
 
-stclient: bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o 
-	g++ -g -o stclient bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS}
+stclient: bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o
+	g++ -g -o stclient bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o ${LIBS}
 
 # Server
 
@@ -37,8 +40,8 @@ bin/tablet_test.o: server/tablet_test.cc common/gen/tabletserver.pb.h common/uti
 	${COMPILE} -o bin/tablet_test.o server/tablet_test.cc
 
 
-tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o
-	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o ${LIBS}
+tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o bin/libclient.o
+	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o bin/libclient.o ${LIBS}
 
 tablet_test: bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o
 	g++ -g -o tablet_test bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o ${LIBS}
