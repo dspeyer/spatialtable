@@ -17,6 +17,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/type_traits.hpp>
+#include <cmath>
 
 struct alwaysTrue{
   template<typename T>
@@ -143,6 +144,24 @@ class tabletImpl : public tablet{
       }
     }
     if (bestdim==-1) return {};
+    std::vector<value> v;
+    rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
+    if (!std::isfinite(cut)) {
+      std::vector<double> vals;
+      vals.reserve(v.size()*2);
+      for (auto& i : v) {
+	double l = getFromPoint(i.first.min_corner(),bestdim);
+	if (std::isfinite(l)) vals.push_back(l);
+	l = getFromPoint(i.first.max_corner(),bestdim);
+	if (std::isfinite(l)) vals.push_back(l);
+      }
+      if (vals.size()==0) {
+	cut = 0;
+      } else {
+	std::sort(vals.begin(), vals.end());
+	cut=vals[vals.size()/2];
+      }
+    }
     std::cout << "splitting " << get_name() << " at dim[" << bestdim << "]=" << cut << std::endl;
     tabletImpl<DIM> *less, *cross, *more;
     less = new tabletImpl<DIM>(this);
@@ -151,12 +170,10 @@ class tabletImpl : public tablet{
     cross->must_cross.push_back(std::make_pair(bestdim,cut));
     more = new tabletImpl<DIM>(this);
     more->borders.set_start(bestdim,cut);
-    std::vector<value> v;
-    rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
     for (auto& i : v) {
-      if (getFromPoint(i.first.max_corner(),bestdim)<cut) {
+      if (getFromPoint(i.first.max_corner(),bestdim)<=cut) {
 	less->rtree.insert(i);
-      } else if (getFromPoint(i.first.min_corner(),bestdim)>cut) {
+      } else if (getFromPoint(i.first.min_corner(),bestdim)>=cut) {
 	more->rtree.insert(i);
       } else {
 	cross->rtree.insert(i);
