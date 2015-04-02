@@ -1,5 +1,6 @@
-COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0
-LIBS = -lrpcz -lprotobuf -lboost_system -lboost_serialization
+HADOOP_HOME = /usr/local/hadoop
+COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -I$(HADOOP_HOME)/include
+LIBS = -lrpcz -lhdfs -lprotobuf -lboost_system -lboost_serialization -L$(HADOOP_HOME)/lib/native -L-L/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
 
 all: tabletserver stclient
 

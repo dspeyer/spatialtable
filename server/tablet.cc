@@ -2,10 +2,11 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp> // for serialization
+#include <boost/archive/text_iarchive.hpp> // for serialization
 #include <vector>
 #include <map>
+#include <sstream>
 #include <fstream>
 #include <string>
 #include "../common/utils.h"
@@ -14,6 +15,8 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/type_traits.hpp>
+#include "hdfs.h"  // for hdfs access
+
 
 struct alwaysTrue{
   template<typename T>
@@ -31,10 +34,10 @@ void serialize(ARCHIVE& ar, boost::geometry::model::box<POINT>& b, unsigned int 
   const POINT &ma=b.max_corner();
   int size = sizeof(POINT)/sizeof(double);
   for (int i=0; i<size; i++) {
-    ar << getFromPoint(mi,i);
+    ar & getFromPoint(mi,i);
   }
   for (int i=0; i<size; i++) {
-    ar << getFromPoint(ma,i);
+    ar & getFromPoint(ma,i);
   }
 }
 }
@@ -92,17 +95,94 @@ class tabletImpl : public tablet{
   }
 
   virtual std::string get_name() {
-    return table + "::" + stringFromBox(borders);
+    return table + ";;" + stringFromBox(borders);
   }
 
  virtual void save(){
-  std::ofstream ofs("testFile");
-  boost::archive::text_oarchive oa(ofs);
+  // get tablet_name
+  std::string tn = this->get_name();
+  tn = "/tablets/" + tn;
+  const char *tName = tn.c_str();
+  // connect to hdfs
+  hdfsFS fs = hdfsConnect("default", 0); //default hdfs instance
+  //char writePath[100] = "/tablets/test1";
+  //const char *tabletDefPath = "/tablets/";
+  //strcpy(writePath, tabletDefPath);
+  //strcpy(writePath, tName);
+  printf("writePath = %s\n",tName);
+  hdfsFile writeFile = hdfsOpenFile(fs, tName, O_WRONLY|O_CREAT, 0, 0, 0);
+  
+  if(!writeFile){
+    fprintf(stderr, "Failed to open %s for writing\n", tName);
+    exit(-1);
+  }
+  // create the archive file
+  //std::ofstream ofs("test3"); //name of tablet
+  std::ostringstream sfs;
+  boost::archive::text_oarchive oa(sfs);
   std::vector<value> v;
   rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
   oa << v;
+  //ofs.close(); 
+  /*const char* archiveFile = "test3";
+   FILE *fp;
+   fp = fopen(archiveFile, "r"); 
+   if(fp == NULL){
+      printf("Failed to open archive file\n");
+   }
+   fseek(fp, 0, SEEK_END);
+   long fsize = ftell(fp);
+   printf("file size = %d",(int)fsize);
+   fseek(fp, 0, SEEK_SET);
+   char *buffer = (char*)malloc(fsize+1);
+   fread(buffer, fsize, 1, fp);
+   fclose(fp);
+  buffer[fsize] = 0;
+  printf("about to write = %s to HDFS\n",buffer);*/
+
+  //sfs.str().c_str(); 
+  tSize num_bytes = hdfsWrite(fs, writeFile, (void*)sfs.str().c_str(), sfs.str().length());
+  if(hdfsFlush(fs, writeFile)){
+       fprintf(stderr, "Failed to 'flush' %s\n", tName);
+        exit(-1);
+  } 
+  
+  printf("num of bytes written to hdfs = %d\n", num_bytes); 
+  hdfsCloseFile(fs, writeFile);
  
  }
+
+virtual void load(const std::string& file){
+  //TODO:  load tablet name file from args
+  hdfsFS fs=hdfsConnect("default",0);
+  std::string rp = "/tablets/" +file;
+  const char *readPath = rp.c_str();      
+  //char readPath[100] = "/tablets/test1";
+  int exists = hdfsExists(fs, readPath);
+  if (exists){
+    fprintf(stderr, "Failed to validate existance of %s\n", readPath);
+   }
+  
+  hdfsFile readFile = hdfsOpenFile(fs, readPath, O_RDONLY, 0, 0, 0);
+ 
+  if(!readFile){
+    fprintf(stderr, "Failed to open %s for reading\n", readPath);
+   exit(-1);
+   }
+  
+  int bytesToRead = hdfsAvailable(fs, readFile);
+  char *buffer = (char *)malloc(bytesToRead);
+  tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer, bytesToRead);
+  
+  std::istringstream ifs(buffer);
+  boost::archive::text_iarchive ia(ifs);
+  std::vector<value> v;
+  ia >> v;	
+  for(int i = 0; i < v.size(); i++){
+	rtree.insert(v[i]);
+   }
+ }
+
 
  private:
   /*protobuf*/ Box borders;
