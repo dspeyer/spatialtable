@@ -5,7 +5,7 @@ message Box {
 
 message Row {
   required Box box = 1;
-  required string value = 2;
+  required bytes value = 2;
 }
 
 message Table {
@@ -18,6 +18,9 @@ message Status {
     Success = 0;
     WrongDimension = 1;
     NoSuchTablet = 2;
+    NoSuchRow = 3;
+    ServerDown = 4;
+    CouldNotFindTablet = 5;
   }
   required StatusValues status = 1;
 }
@@ -27,6 +30,10 @@ message InsertRequest {
   required Row data = 2;
 }
 
+message RemoveRequest {
+  required string tablet = 1;
+  required Box key = 2;
+}
 
 message QueryRequest {
   required string tablet = 1;
@@ -53,6 +60,15 @@ message ListResponse {
 service TabletServerService {
   rpc CreateTable(Table) returns(Status);
   rpc Insert(InsertRequest) returns(Status);
+  rpc Remove(RemoveRequest) returns(Status);
   rpc Query(QueryRequest) returns(QueryResponse);
   rpc ListTablets(ListRequest) returns(ListResponse);
+}
+
+message TabletInfo {
+  required string server = 1;
+  required string name = 2;
+  repeated int32 must_cross_dims = 3;
+  repeated double must_cross_vals = 4;
+  optional Status status = 5;
 }

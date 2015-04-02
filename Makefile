@@ -1,6 +1,6 @@
 HADOOP_HOME = /usr/local/hadoop
-COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -I$(HADOOP_HOME)/include
-LIBS = -lrpcz -lhdfs -lprotobuf -lboost_system -lboost_serialization -L$(HADOOP_HOME)/lib/native -L-L/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
+COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -DBOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL -Wall -Wno-unused-variable -Wno-unused-function -I$(HADOOP_HOME)/include
+LIBS = -lrpcz -lprotobuf -lboost_system -lboost_serialization -lhdfs -L$(HADOOP_HOME)/lib/native -L-L/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
 
 all: tabletserver stclient
 
@@ -18,13 +18,16 @@ bin/tabletserver.pb.o: common/gen/tabletserver.pb.cc common/gen/tabletserver.pb.
 bin/tabletserver.rpcz.o: common/gen/tabletserver.rpcz.cc common/gen/tabletserver.rpcz.h common/gen/tabletserver.pb.h
 	${COMPILE} -o bin/tabletserver.rpcz.o common/gen/tabletserver.rpcz.cc
 
+bin/libclient.o:  common/gen/tabletserver.rpcz.h common/gen/tabletserver.pb.h common/client/libclient.h common/client/libclient.cc common/utils.h
+	${COMPILE} -o bin/libclient.o common/client/libclient.cc
+
 # Client
 
-bin/stclient.o: client/stclient.cc common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h
+bin/stclient.o: client/stclient.cc common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h common/client/libclient.h
 	${COMPILE} -o bin/stclient.o client/stclient.cc
 
-stclient: bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o 
-	g++ -g -o stclient bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS}
+stclient: bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o
+	g++ -g -o stclient bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o ${LIBS}
 
 # Server
 
@@ -38,8 +41,8 @@ bin/tablet_test.o: server/tablet_test.cc common/gen/tabletserver.pb.h common/uti
 	${COMPILE} -o bin/tablet_test.o server/tablet_test.cc
 
 
-tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o
-	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o ${LIBS}
+tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o bin/libclient.o
+	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o bin/libclient.o ${LIBS}
 
 tablet_test: bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o
 	g++ -g -o tablet_test bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o ${LIBS}

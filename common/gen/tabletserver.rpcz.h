@@ -39,6 +39,8 @@ class TabletServerService : public rpcz::service {
                        ::rpcz::reply< ::Status> response);
   virtual void Insert(const ::InsertRequest& request,
                        ::rpcz::reply< ::Status> response);
+  virtual void Remove(const ::RemoveRequest& request,
+                       ::rpcz::reply< ::Status> response);
   virtual void Query(const ::QueryRequest& request,
                        ::rpcz::reply< ::QueryResponse> response);
   virtual void ListTablets(const ::ListRequest& request,
@@ -81,6 +83,12 @@ class TabletServerService_Stub {
                        ::Status* response,
                        ::rpcz::rpc* rpc,                     ::rpcz::closure* done);
   void Insert(const ::InsertRequest& request,
+                       ::Status* response,
+                       long deadline_ms = -1);
+  void Remove(const ::RemoveRequest& request,
+                       ::Status* response,
+                       ::rpcz::rpc* rpc,                     ::rpcz::closure* done);
+  void Remove(const ::RemoveRequest& request,
                        ::Status* response,
                        long deadline_ms = -1);
   void Query(const ::QueryRequest& request,

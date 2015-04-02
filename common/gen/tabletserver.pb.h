@@ -37,20 +37,25 @@ class Row;
 class Table;
 class Status;
 class InsertRequest;
+class RemoveRequest;
 class QueryRequest;
 class QueryResponse;
 class ListRequest;
 class TabletDescription;
 class ListResponse;
+class TabletInfo;
 
 enum Status_StatusValues {
   Status_StatusValues_Success = 0,
   Status_StatusValues_WrongDimension = 1,
-  Status_StatusValues_NoSuchTablet = 2
+  Status_StatusValues_NoSuchTablet = 2,
+  Status_StatusValues_NoSuchRow = 3,
+  Status_StatusValues_ServerDown = 4,
+  Status_StatusValues_CouldNotFindTablet = 5
 };
 bool Status_StatusValues_IsValid(int value);
 const Status_StatusValues Status_StatusValues_StatusValues_MIN = Status_StatusValues_Success;
-const Status_StatusValues Status_StatusValues_StatusValues_MAX = Status_StatusValues_NoSuchTablet;
+const Status_StatusValues Status_StatusValues_StatusValues_MAX = Status_StatusValues_CouldNotFindTablet;
 const int Status_StatusValues_StatusValues_ARRAYSIZE = Status_StatusValues_StatusValues_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Status_StatusValues_descriptor();
@@ -226,14 +231,14 @@ class Row : public ::google::protobuf::Message {
   inline ::Box* release_box();
   inline void set_allocated_box(::Box* box);
 
-  // required string value = 2;
+  // required bytes value = 2;
   inline bool has_value() const;
   inline void clear_value();
   static const int kValueFieldNumber = 2;
   inline const ::std::string& value() const;
   inline void set_value(const ::std::string& value);
   inline void set_value(const char* value);
-  inline void set_value(const char* value, size_t size);
+  inline void set_value(const void* value, size_t size);
   inline ::std::string* mutable_value();
   inline ::std::string* release_value();
   inline void set_allocated_value(::std::string* value);
@@ -415,6 +420,9 @@ class Status : public ::google::protobuf::Message {
   static const StatusValues Success = Status_StatusValues_Success;
   static const StatusValues WrongDimension = Status_StatusValues_WrongDimension;
   static const StatusValues NoSuchTablet = Status_StatusValues_NoSuchTablet;
+  static const StatusValues NoSuchRow = Status_StatusValues_NoSuchRow;
+  static const StatusValues ServerDown = Status_StatusValues_ServerDown;
+  static const StatusValues CouldNotFindTablet = Status_StatusValues_CouldNotFindTablet;
   static inline bool StatusValues_IsValid(int value) {
     return Status_StatusValues_IsValid(value);
   }
@@ -562,6 +570,105 @@ class InsertRequest : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static InsertRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RemoveRequest : public ::google::protobuf::Message {
+ public:
+  RemoveRequest();
+  virtual ~RemoveRequest();
+
+  RemoveRequest(const RemoveRequest& from);
+
+  inline RemoveRequest& operator=(const RemoveRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RemoveRequest& default_instance();
+
+  void Swap(RemoveRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  RemoveRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RemoveRequest& from);
+  void MergeFrom(const RemoveRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string tablet = 1;
+  inline bool has_tablet() const;
+  inline void clear_tablet();
+  static const int kTabletFieldNumber = 1;
+  inline const ::std::string& tablet() const;
+  inline void set_tablet(const ::std::string& value);
+  inline void set_tablet(const char* value);
+  inline void set_tablet(const char* value, size_t size);
+  inline ::std::string* mutable_tablet();
+  inline ::std::string* release_tablet();
+  inline void set_allocated_tablet(::std::string* tablet);
+
+  // required .Box key = 2;
+  inline bool has_key() const;
+  inline void clear_key();
+  static const int kKeyFieldNumber = 2;
+  inline const ::Box& key() const;
+  inline ::Box* mutable_key();
+  inline ::Box* release_key();
+  inline void set_allocated_key(::Box* key);
+
+  // @@protoc_insertion_point(class_scope:RemoveRequest)
+ private:
+  inline void set_has_tablet();
+  inline void clear_has_tablet();
+  inline void set_has_key();
+  inline void clear_has_key();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* tablet_;
+  ::Box* key_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_tabletserver_2eproto();
+  friend void protobuf_AssignDesc_tabletserver_2eproto();
+  friend void protobuf_ShutdownFile_tabletserver_2eproto();
+
+  void InitAsDefaultInstance();
+  static RemoveRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1023,6 +1130,146 @@ class ListResponse : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static ListResponse* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class TabletInfo : public ::google::protobuf::Message {
+ public:
+  TabletInfo();
+  virtual ~TabletInfo();
+
+  TabletInfo(const TabletInfo& from);
+
+  inline TabletInfo& operator=(const TabletInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TabletInfo& default_instance();
+
+  void Swap(TabletInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  TabletInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TabletInfo& from);
+  void MergeFrom(const TabletInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string server = 1;
+  inline bool has_server() const;
+  inline void clear_server();
+  static const int kServerFieldNumber = 1;
+  inline const ::std::string& server() const;
+  inline void set_server(const ::std::string& value);
+  inline void set_server(const char* value);
+  inline void set_server(const char* value, size_t size);
+  inline ::std::string* mutable_server();
+  inline ::std::string* release_server();
+  inline void set_allocated_server(::std::string* server);
+
+  // required string name = 2;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 2;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
+  // repeated int32 must_cross_dims = 3;
+  inline int must_cross_dims_size() const;
+  inline void clear_must_cross_dims();
+  static const int kMustCrossDimsFieldNumber = 3;
+  inline ::google::protobuf::int32 must_cross_dims(int index) const;
+  inline void set_must_cross_dims(int index, ::google::protobuf::int32 value);
+  inline void add_must_cross_dims(::google::protobuf::int32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+      must_cross_dims() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+      mutable_must_cross_dims();
+
+  // repeated double must_cross_vals = 4;
+  inline int must_cross_vals_size() const;
+  inline void clear_must_cross_vals();
+  static const int kMustCrossValsFieldNumber = 4;
+  inline double must_cross_vals(int index) const;
+  inline void set_must_cross_vals(int index, double value);
+  inline void add_must_cross_vals(double value);
+  inline const ::google::protobuf::RepeatedField< double >&
+      must_cross_vals() const;
+  inline ::google::protobuf::RepeatedField< double >*
+      mutable_must_cross_vals();
+
+  // optional .Status status = 5;
+  inline bool has_status() const;
+  inline void clear_status();
+  static const int kStatusFieldNumber = 5;
+  inline const ::Status& status() const;
+  inline ::Status* mutable_status();
+  inline ::Status* release_status();
+  inline void set_allocated_status(::Status* status);
+
+  // @@protoc_insertion_point(class_scope:TabletInfo)
+ private:
+  inline void set_has_server();
+  inline void clear_has_server();
+  inline void set_has_name();
+  inline void clear_has_name();
+  inline void set_has_status();
+  inline void clear_has_status();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* server_;
+  ::std::string* name_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > must_cross_dims_;
+  ::google::protobuf::RepeatedField< double > must_cross_vals_;
+  ::Status* status_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+
+  friend void  protobuf_AddDesc_tabletserver_2eproto();
+  friend void protobuf_AssignDesc_tabletserver_2eproto();
+  friend void protobuf_ShutdownFile_tabletserver_2eproto();
+
+  void InitAsDefaultInstance();
+  static TabletInfo* default_instance_;
+};
 // ===================================================================
 
 
@@ -1122,7 +1369,7 @@ inline void Row::set_allocated_box(::Box* box) {
   }
 }
 
-// required string value = 2;
+// required bytes value = 2;
 inline bool Row::has_value() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1155,7 +1402,7 @@ inline void Row::set_value(const char* value) {
   }
   value_->assign(value);
 }
-inline void Row::set_value(const char* value, size_t size) {
+inline void Row::set_value(const void* value, size_t size) {
   set_has_value();
   if (value_ == &::google::protobuf::internal::kEmptyString) {
     value_ = new ::std::string;
@@ -1424,6 +1671,118 @@ inline void InsertRequest::set_allocated_data(::Row* data) {
     set_has_data();
   } else {
     clear_has_data();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// RemoveRequest
+
+// required string tablet = 1;
+inline bool RemoveRequest::has_tablet() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RemoveRequest::set_has_tablet() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RemoveRequest::clear_has_tablet() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RemoveRequest::clear_tablet() {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    tablet_->clear();
+  }
+  clear_has_tablet();
+}
+inline const ::std::string& RemoveRequest::tablet() const {
+  return *tablet_;
+}
+inline void RemoveRequest::set_tablet(const ::std::string& value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void RemoveRequest::set_tablet(const char* value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void RemoveRequest::set_tablet(const char* value, size_t size) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* RemoveRequest::mutable_tablet() {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  return tablet_;
+}
+inline ::std::string* RemoveRequest::release_tablet() {
+  clear_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tablet_;
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void RemoveRequest::set_allocated_tablet(::std::string* tablet) {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    delete tablet_;
+  }
+  if (tablet) {
+    set_has_tablet();
+    tablet_ = tablet;
+  } else {
+    clear_has_tablet();
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required .Box key = 2;
+inline bool RemoveRequest::has_key() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RemoveRequest::set_has_key() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RemoveRequest::clear_has_key() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RemoveRequest::clear_key() {
+  if (key_ != NULL) key_->::Box::Clear();
+  clear_has_key();
+}
+inline const ::Box& RemoveRequest::key() const {
+  return key_ != NULL ? *key_ : *default_instance_->key_;
+}
+inline ::Box* RemoveRequest::mutable_key() {
+  set_has_key();
+  if (key_ == NULL) key_ = new ::Box;
+  return key_;
+}
+inline ::Box* RemoveRequest::release_key() {
+  clear_has_key();
+  ::Box* temp = key_;
+  key_ = NULL;
+  return temp;
+}
+inline void RemoveRequest::set_allocated_key(::Box* key) {
+  delete key_;
+  key_ = key;
+  if (key) {
+    set_has_key();
+  } else {
+    clear_has_key();
   }
 }
 
@@ -1755,6 +2114,238 @@ ListResponse::results() const {
 inline ::google::protobuf::RepeatedPtrField< ::TabletDescription >*
 ListResponse::mutable_results() {
   return &results_;
+}
+
+// -------------------------------------------------------------------
+
+// TabletInfo
+
+// required string server = 1;
+inline bool TabletInfo::has_server() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TabletInfo::set_has_server() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TabletInfo::clear_has_server() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TabletInfo::clear_server() {
+  if (server_ != &::google::protobuf::internal::kEmptyString) {
+    server_->clear();
+  }
+  clear_has_server();
+}
+inline const ::std::string& TabletInfo::server() const {
+  return *server_;
+}
+inline void TabletInfo::set_server(const ::std::string& value) {
+  set_has_server();
+  if (server_ == &::google::protobuf::internal::kEmptyString) {
+    server_ = new ::std::string;
+  }
+  server_->assign(value);
+}
+inline void TabletInfo::set_server(const char* value) {
+  set_has_server();
+  if (server_ == &::google::protobuf::internal::kEmptyString) {
+    server_ = new ::std::string;
+  }
+  server_->assign(value);
+}
+inline void TabletInfo::set_server(const char* value, size_t size) {
+  set_has_server();
+  if (server_ == &::google::protobuf::internal::kEmptyString) {
+    server_ = new ::std::string;
+  }
+  server_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TabletInfo::mutable_server() {
+  set_has_server();
+  if (server_ == &::google::protobuf::internal::kEmptyString) {
+    server_ = new ::std::string;
+  }
+  return server_;
+}
+inline ::std::string* TabletInfo::release_server() {
+  clear_has_server();
+  if (server_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = server_;
+    server_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TabletInfo::set_allocated_server(::std::string* server) {
+  if (server_ != &::google::protobuf::internal::kEmptyString) {
+    delete server_;
+  }
+  if (server) {
+    set_has_server();
+    server_ = server;
+  } else {
+    clear_has_server();
+    server_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string name = 2;
+inline bool TabletInfo::has_name() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TabletInfo::set_has_name() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TabletInfo::clear_has_name() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TabletInfo::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& TabletInfo::name() const {
+  return *name_;
+}
+inline void TabletInfo::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void TabletInfo::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void TabletInfo::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TabletInfo::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* TabletInfo::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TabletInfo::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated int32 must_cross_dims = 3;
+inline int TabletInfo::must_cross_dims_size() const {
+  return must_cross_dims_.size();
+}
+inline void TabletInfo::clear_must_cross_dims() {
+  must_cross_dims_.Clear();
+}
+inline ::google::protobuf::int32 TabletInfo::must_cross_dims(int index) const {
+  return must_cross_dims_.Get(index);
+}
+inline void TabletInfo::set_must_cross_dims(int index, ::google::protobuf::int32 value) {
+  must_cross_dims_.Set(index, value);
+}
+inline void TabletInfo::add_must_cross_dims(::google::protobuf::int32 value) {
+  must_cross_dims_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+TabletInfo::must_cross_dims() const {
+  return must_cross_dims_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+TabletInfo::mutable_must_cross_dims() {
+  return &must_cross_dims_;
+}
+
+// repeated double must_cross_vals = 4;
+inline int TabletInfo::must_cross_vals_size() const {
+  return must_cross_vals_.size();
+}
+inline void TabletInfo::clear_must_cross_vals() {
+  must_cross_vals_.Clear();
+}
+inline double TabletInfo::must_cross_vals(int index) const {
+  return must_cross_vals_.Get(index);
+}
+inline void TabletInfo::set_must_cross_vals(int index, double value) {
+  must_cross_vals_.Set(index, value);
+}
+inline void TabletInfo::add_must_cross_vals(double value) {
+  must_cross_vals_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< double >&
+TabletInfo::must_cross_vals() const {
+  return must_cross_vals_;
+}
+inline ::google::protobuf::RepeatedField< double >*
+TabletInfo::mutable_must_cross_vals() {
+  return &must_cross_vals_;
+}
+
+// optional .Status status = 5;
+inline bool TabletInfo::has_status() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void TabletInfo::set_has_status() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void TabletInfo::clear_has_status() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void TabletInfo::clear_status() {
+  if (status_ != NULL) status_->::Status::Clear();
+  clear_has_status();
+}
+inline const ::Status& TabletInfo::status() const {
+  return status_ != NULL ? *status_ : *default_instance_->status_;
+}
+inline ::Status* TabletInfo::mutable_status() {
+  set_has_status();
+  if (status_ == NULL) status_ = new ::Status;
+  return status_;
+}
+inline ::Status* TabletInfo::release_status() {
+  clear_has_status();
+  ::Status* temp = status_;
+  status_ = NULL;
+  return temp;
+}
+inline void TabletInfo::set_allocated_status(::Status* status) {
+  delete status_;
+  status_ = status;
+  if (status) {
+    set_has_status();
+  } else {
+    clear_has_status();
+  }
 }
 
 

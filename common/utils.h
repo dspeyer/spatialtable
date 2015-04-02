@@ -117,4 +117,40 @@ static std::string stringFromBox(const /*protobuf*/ Box& box) {
   return out;
 }
 
+template<typename POINT>
+std::string stringFromBox(const boost::geometry::model::box<POINT>& b) {
+  std::string out = "";
+  for (int d=0; d<sizeof(POINT)/sizeof(double); d++) {
+    if (d!=0) out+="_x_";
+    out += stringFromDouble(getFromPoint(b.min_corner(),d));
+    out += "..";
+    out += stringFromDouble(getFromPoint(b.max_corner(),d));
+  }
+  return out;
+}
+
+template<typename POINT>
+bool operator==(const boost::geometry::model::box<POINT>& b1,
+		const boost::geometry::model::box<POINT>& b2) {
+  return std::memcmp(&b1,&b2,sizeof(b1))==0;
+}
+
+template<typename POINT>
+bool operator!=(const boost::geometry::model::box<POINT>& b1, 
+		const boost::geometry::model::box<POINT>& b2) {
+  return std::memcmp(&b1,&b2,sizeof(b1))!=0;
+}
+
+static bool is_within(const Box& bigger, const Box& smaller) {
+  if (bigger.start_size()!=bigger.end_size() || bigger.start_size()!=smaller.start_size() ||bigger.start_size()!=smaller.end_size()) {
+    return false;
+  }
+  for (int i=0; i<bigger.start_size(); i++) {
+    if (bigger.start(i)>smaller.start(i) || bigger.end(i)<smaller.end(i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 #endif // _UTILS_H_

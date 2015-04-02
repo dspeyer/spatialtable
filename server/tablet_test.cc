@@ -32,10 +32,21 @@ int main(){
  tablet *x = tablet::New("testInsert",2);
  x->load(t->get_name());
 x->query(q, true, resp2);
-  std::cerr << "returned\n";
-  for (int i=0; i<resp2.results_size(); i++) {
-    Row* r = resp2.mutable_results(i);
+for (int i=0; i<resp2.results_size(); i++) {
+      Row* r = resp2.mutable_results(i);
+      std::cout << r->box().start(0) << ".." << r->box().end(0) << " x " << r->box().start(1) << ".." << r->box().end(1) << " = " << r->value() << std    ::endl;
+  QueryResponse resp3;
+  t->query(a, true, resp3);
+  std::cout << "querying a...\n";
+  for (int i=0; i<resp3.results_size(); i++) {
+    Row* r = resp3.mutable_results(i);
     std::cout << r->box().start(0) << ".." << r->box().end(0) << " x " << r->box().start(1) << ".." << r->box().end(1) << " = " << r->value() << std::endl;
   }
+  std::cout << std::endl;
+
+  t->remove(a);
+  QueryResponse resp2;
+  t->query(q, true, resp2);
+  std::cerr << "returned\n";
 
 }
