@@ -68,7 +68,7 @@ TabletInfo tabletInfoFromStatus(Status::StatusValues status) {
 TabletInfo TableStub::findTabletWithBox(const Box& b, int layer) {
   TabletInfo md0;
   md0.set_server("localhost:5555"); // FIXME
-  md0.set_name("md0::"+table);
+  md0.set_name("md0;;"+table);
   return findTabletWithBox(b, layer, md0);
 }
 

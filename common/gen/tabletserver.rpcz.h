@@ -45,6 +45,10 @@ class TabletServerService : public rpcz::service {
                        ::rpcz::reply< ::QueryResponse> response);
   virtual void ListTablets(const ::ListRequest& request,
                        ::rpcz::reply< ::ListResponse> response);
+  virtual void LoadTablet(const ::LoadRequest& request,
+                       ::rpcz::reply< ::Status> response);
+  virtual void UnLoadTablet(const ::UnLoadRequest& request,
+                       ::rpcz::reply< ::Status> response);
 
   // implements Service ----------------------------------------------
 
@@ -102,6 +106,18 @@ class TabletServerService_Stub {
                        ::rpcz::rpc* rpc,                     ::rpcz::closure* done);
   void ListTablets(const ::ListRequest& request,
                        ::ListResponse* response,
+                       long deadline_ms = -1);
+  void LoadTablet(const ::LoadRequest& request,
+                       ::Status* response,
+                       ::rpcz::rpc* rpc,                     ::rpcz::closure* done);
+  void LoadTablet(const ::LoadRequest& request,
+                       ::Status* response,
+                       long deadline_ms = -1);
+  void UnLoadTablet(const ::UnLoadRequest& request,
+                       ::Status* response,
+                       ::rpcz::rpc* rpc,                     ::rpcz::closure* done);
+  void UnLoadTablet(const ::UnLoadRequest& request,
+                       ::Status* response,
                        long deadline_ms = -1);
  private:
   ::rpcz::rpc_channel* channel_;

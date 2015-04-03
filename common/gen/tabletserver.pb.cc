@@ -31,6 +31,12 @@ const ::google::protobuf::Descriptor* Status_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Status_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* Status_StatusValues_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* UnLoadRequest_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  UnLoadRequest_reflection_ = NULL;
+const ::google::protobuf::Descriptor* LoadRequest_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  LoadRequest_reflection_ = NULL;
 const ::google::protobuf::Descriptor* InsertRequest_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   InsertRequest_reflection_ = NULL;
@@ -129,7 +135,38 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Status));
   Status_StatusValues_descriptor_ = Status_descriptor_->enum_type(0);
-  InsertRequest_descriptor_ = file->message_type(4);
+  UnLoadRequest_descriptor_ = file->message_type(4);
+  static const int UnLoadRequest_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UnLoadRequest, tablet_),
+  };
+  UnLoadRequest_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      UnLoadRequest_descriptor_,
+      UnLoadRequest::default_instance_,
+      UnLoadRequest_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UnLoadRequest, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UnLoadRequest, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(UnLoadRequest));
+  LoadRequest_descriptor_ = file->message_type(5);
+  static const int LoadRequest_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoadRequest, tablet_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoadRequest, dim_),
+  };
+  LoadRequest_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      LoadRequest_descriptor_,
+      LoadRequest::default_instance_,
+      LoadRequest_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoadRequest, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoadRequest, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(LoadRequest));
+  InsertRequest_descriptor_ = file->message_type(6);
   static const int InsertRequest_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(InsertRequest, tablet_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(InsertRequest, data_),
@@ -145,7 +182,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(InsertRequest));
-  RemoveRequest_descriptor_ = file->message_type(5);
+  RemoveRequest_descriptor_ = file->message_type(7);
   static const int RemoveRequest_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemoveRequest, tablet_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemoveRequest, key_),
@@ -161,7 +198,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RemoveRequest));
-  QueryRequest_descriptor_ = file->message_type(6);
+  QueryRequest_descriptor_ = file->message_type(8);
   static const int QueryRequest_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(QueryRequest, tablet_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(QueryRequest, query_),
@@ -178,7 +215,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(QueryRequest));
-  QueryResponse_descriptor_ = file->message_type(7);
+  QueryResponse_descriptor_ = file->message_type(9);
   static const int QueryResponse_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(QueryResponse, status_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(QueryResponse, results_),
@@ -194,7 +231,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(QueryResponse));
-  ListRequest_descriptor_ = file->message_type(8);
+  ListRequest_descriptor_ = file->message_type(10);
   static const int ListRequest_offsets_[1] = {
   };
   ListRequest_reflection_ =
@@ -208,7 +245,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ListRequest));
-  TabletDescription_descriptor_ = file->message_type(9);
+  TabletDescription_descriptor_ = file->message_type(11);
   static const int TabletDescription_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletDescription, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletDescription, dim_),
@@ -224,7 +261,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TabletDescription));
-  ListResponse_descriptor_ = file->message_type(10);
+  ListResponse_descriptor_ = file->message_type(12);
   static const int ListResponse_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListResponse, results_),
   };
@@ -239,7 +276,7 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ListResponse));
-  TabletInfo_descriptor_ = file->message_type(11);
+  TabletInfo_descriptor_ = file->message_type(13);
   static const int TabletInfo_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletInfo, server_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletInfo, name_),
@@ -279,6 +316,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Status_descriptor_, &Status::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    UnLoadRequest_descriptor_, &UnLoadRequest::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    LoadRequest_descriptor_, &LoadRequest::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     InsertRequest_descriptor_, &InsertRequest::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     RemoveRequest_descriptor_, &RemoveRequest::default_instance());
@@ -307,6 +348,10 @@ void protobuf_ShutdownFile_tabletserver_2eproto() {
   delete Table_reflection_;
   delete Status::default_instance_;
   delete Status_reflection_;
+  delete UnLoadRequest::default_instance_;
+  delete UnLoadRequest_reflection_;
+  delete LoadRequest::default_instance_;
+  delete LoadRequest_reflection_;
   delete InsertRequest::default_instance_;
   delete InsertRequest_reflection_;
   delete RemoveRequest::default_instance_;
@@ -335,34 +380,41 @@ void protobuf_AddDesc_tabletserver_2eproto() {
     "\n\022tabletserver.proto\"!\n\003Box\022\r\n\005start\030\001 \003"
     "(\001\022\013\n\003end\030\002 \003(\001\"\'\n\003Row\022\021\n\003box\030\001 \002(\0132\004.Bo"
     "x\022\r\n\005value\030\002 \002(\014\"\"\n\005Table\022\014\n\004name\030\001 \002(\t\022"
-    "\013\n\003dim\030\002 \002(\005\"\250\001\n\006Status\022$\n\006status\030\001 \002(\0162"
-    "\024.Status.StatusValues\"x\n\014StatusValues\022\013\n"
-    "\007Success\020\000\022\022\n\016WrongDimension\020\001\022\020\n\014NoSuch"
-    "Tablet\020\002\022\r\n\tNoSuchRow\020\003\022\016\n\nServerDown\020\004\022"
-    "\026\n\022CouldNotFindTablet\020\005\"3\n\rInsertRequest"
-    "\022\016\n\006tablet\030\001 \002(\t\022\022\n\004data\030\002 \002(\0132\004.Row\"2\n\r"
-    "RemoveRequest\022\016\n\006tablet\030\001 \002(\t\022\021\n\003key\030\002 \002"
-    "(\0132\004.Box\"F\n\014QueryRequest\022\016\n\006tablet\030\001 \002(\t"
-    "\022\023\n\005query\030\002 \002(\0132\004.Box\022\021\n\tis_within\030\003 \002(\010"
-    "\"\?\n\rQueryResponse\022\027\n\006status\030\001 \002(\0132\007.Stat"
-    "us\022\025\n\007results\030\002 \003(\0132\004.Row\"\r\n\013ListRequest"
-    "\".\n\021TabletDescription\022\014\n\004name\030\001 \002(\t\022\013\n\003d"
-    "im\030\002 \002(\005\"3\n\014ListResponse\022#\n\007results\030\001 \003("
-    "\0132\022.TabletDescription\"u\n\nTabletInfo\022\016\n\006s"
-    "erver\030\001 \002(\t\022\014\n\004name\030\002 \002(\t\022\027\n\017must_cross_"
-    "dims\030\003 \003(\005\022\027\n\017must_cross_vals\030\004 \003(\001\022\027\n\006s"
-    "tatus\030\005 \001(\0132\007.Status2\317\001\n\023TabletServerSer"
-    "vice\022\036\n\013CreateTable\022\006.Table\032\007.Status\022!\n\006"
-    "Insert\022\016.InsertRequest\032\007.Status\022!\n\006Remov"
-    "e\022\016.RemoveRequest\032\007.Status\022&\n\005Query\022\r.Qu"
-    "eryRequest\032\016.QueryResponse\022*\n\013ListTablet"
-    "s\022\014.ListRequest\032\r.ListResponse", 990);
+    "\013\n\003dim\030\002 \002(\005\"\334\001\n\006Status\022$\n\006status\030\001 \002(\0162"
+    "\024.Status.StatusValues\"\253\001\n\014StatusValues\022\013"
+    "\n\007Success\020\000\022\022\n\016WrongDimension\020\001\022\020\n\014NoSuc"
+    "hTablet\020\002\022\r\n\tNoSuchRow\020\003\022\016\n\nServerDown\020\004"
+    "\022\026\n\022CouldNotFindTablet\020\005\022\016\n\nNoSuchFile\020\006"
+    "\022\020\n\014HfsReadError\020\007\022\017\n\013CorruptFile\020\010\"\037\n\rU"
+    "nLoadRequest\022\016\n\006tablet\030\001 \002(\t\"*\n\013LoadRequ"
+    "est\022\016\n\006tablet\030\001 \002(\t\022\013\n\003dim\030\002 \002(\005\"3\n\rInse"
+    "rtRequest\022\016\n\006tablet\030\001 \002(\t\022\022\n\004data\030\002 \002(\0132"
+    "\004.Row\"2\n\rRemoveRequest\022\016\n\006tablet\030\001 \002(\t\022\021"
+    "\n\003key\030\002 \002(\0132\004.Box\"F\n\014QueryRequest\022\016\n\006tab"
+    "let\030\001 \002(\t\022\023\n\005query\030\002 \002(\0132\004.Box\022\021\n\tis_wit"
+    "hin\030\003 \002(\010\"\?\n\rQueryResponse\022\027\n\006status\030\001 \002"
+    "(\0132\007.Status\022\025\n\007results\030\002 \003(\0132\004.Row\"\r\n\013Li"
+    "stRequest\".\n\021TabletDescription\022\014\n\004name\030\001"
+    " \002(\t\022\013\n\003dim\030\002 \002(\005\"3\n\014ListResponse\022#\n\007res"
+    "ults\030\001 \003(\0132\022.TabletDescription\"u\n\nTablet"
+    "Info\022\016\n\006server\030\001 \002(\t\022\014\n\004name\030\002 \002(\t\022\027\n\017mu"
+    "st_cross_dims\030\003 \003(\005\022\027\n\017must_cross_vals\030\004"
+    " \003(\001\022\027\n\006status\030\005 \001(\0132\007.Status2\235\002\n\023Tablet"
+    "ServerService\022\036\n\013CreateTable\022\006.Table\032\007.S"
+    "tatus\022!\n\006Insert\022\016.InsertRequest\032\007.Status"
+    "\022!\n\006Remove\022\016.RemoveRequest\032\007.Status\022&\n\005Q"
+    "uery\022\r.QueryRequest\032\016.QueryResponse\022*\n\013L"
+    "istTablets\022\014.ListRequest\032\r.ListResponse\022"
+    "#\n\nLoadTablet\022\014.LoadRequest\032\007.Status\022\'\n\014"
+    "UnLoadTablet\022\016.UnLoadRequest\032\007.Status", 1197);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "tabletserver.proto", &protobuf_RegisterTypes);
   Box::default_instance_ = new Box();
   Row::default_instance_ = new Row();
   Table::default_instance_ = new Table();
   Status::default_instance_ = new Status();
+  UnLoadRequest::default_instance_ = new UnLoadRequest();
+  LoadRequest::default_instance_ = new LoadRequest();
   InsertRequest::default_instance_ = new InsertRequest();
   RemoveRequest::default_instance_ = new RemoveRequest();
   QueryRequest::default_instance_ = new QueryRequest();
@@ -375,6 +427,8 @@ void protobuf_AddDesc_tabletserver_2eproto() {
   Row::default_instance_->InitAsDefaultInstance();
   Table::default_instance_->InitAsDefaultInstance();
   Status::default_instance_->InitAsDefaultInstance();
+  UnLoadRequest::default_instance_->InitAsDefaultInstance();
+  LoadRequest::default_instance_->InitAsDefaultInstance();
   InsertRequest::default_instance_->InitAsDefaultInstance();
   RemoveRequest::default_instance_->InitAsDefaultInstance();
   QueryRequest::default_instance_->InitAsDefaultInstance();
@@ -1188,6 +1242,9 @@ bool Status_StatusValues_IsValid(int value) {
     case 3:
     case 4:
     case 5:
+    case 6:
+    case 7:
+    case 8:
       return true;
     default:
       return false;
@@ -1201,6 +1258,9 @@ const Status_StatusValues Status::NoSuchTablet;
 const Status_StatusValues Status::NoSuchRow;
 const Status_StatusValues Status::ServerDown;
 const Status_StatusValues Status::CouldNotFindTablet;
+const Status_StatusValues Status::NoSuchFile;
+const Status_StatusValues Status::HfsReadError;
+const Status_StatusValues Status::CorruptFile;
 const Status_StatusValues Status::StatusValues_MIN;
 const Status_StatusValues Status::StatusValues_MAX;
 const int Status::StatusValues_ARRAYSIZE;
@@ -1414,6 +1474,498 @@ void Status::Swap(Status* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = Status_descriptor_;
   metadata.reflection = Status_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int UnLoadRequest::kTabletFieldNumber;
+#endif  // !_MSC_VER
+
+UnLoadRequest::UnLoadRequest()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void UnLoadRequest::InitAsDefaultInstance() {
+}
+
+UnLoadRequest::UnLoadRequest(const UnLoadRequest& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void UnLoadRequest::SharedCtor() {
+  _cached_size_ = 0;
+  tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+UnLoadRequest::~UnLoadRequest() {
+  SharedDtor();
+}
+
+void UnLoadRequest::SharedDtor() {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    delete tablet_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void UnLoadRequest::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* UnLoadRequest::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return UnLoadRequest_descriptor_;
+}
+
+const UnLoadRequest& UnLoadRequest::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_tabletserver_2eproto();
+  return *default_instance_;
+}
+
+UnLoadRequest* UnLoadRequest::default_instance_ = NULL;
+
+UnLoadRequest* UnLoadRequest::New() const {
+  return new UnLoadRequest;
+}
+
+void UnLoadRequest::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_tablet()) {
+      if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+        tablet_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool UnLoadRequest::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required string tablet = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_tablet()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->tablet().data(), this->tablet().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void UnLoadRequest::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required string tablet = 1;
+  if (has_tablet()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->tablet().data(), this->tablet().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->tablet(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* UnLoadRequest::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required string tablet = 1;
+  if (has_tablet()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->tablet().data(), this->tablet().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->tablet(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int UnLoadRequest::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required string tablet = 1;
+    if (has_tablet()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->tablet());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void UnLoadRequest::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const UnLoadRequest* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const UnLoadRequest*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void UnLoadRequest::MergeFrom(const UnLoadRequest& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_tablet()) {
+      set_tablet(from.tablet());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void UnLoadRequest::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void UnLoadRequest::CopyFrom(const UnLoadRequest& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool UnLoadRequest::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+
+  return true;
+}
+
+void UnLoadRequest::Swap(UnLoadRequest* other) {
+  if (other != this) {
+    std::swap(tablet_, other->tablet_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata UnLoadRequest::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = UnLoadRequest_descriptor_;
+  metadata.reflection = UnLoadRequest_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int LoadRequest::kTabletFieldNumber;
+const int LoadRequest::kDimFieldNumber;
+#endif  // !_MSC_VER
+
+LoadRequest::LoadRequest()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void LoadRequest::InitAsDefaultInstance() {
+}
+
+LoadRequest::LoadRequest(const LoadRequest& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void LoadRequest::SharedCtor() {
+  _cached_size_ = 0;
+  tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  dim_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+LoadRequest::~LoadRequest() {
+  SharedDtor();
+}
+
+void LoadRequest::SharedDtor() {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    delete tablet_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void LoadRequest::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* LoadRequest::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return LoadRequest_descriptor_;
+}
+
+const LoadRequest& LoadRequest::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_tabletserver_2eproto();
+  return *default_instance_;
+}
+
+LoadRequest* LoadRequest::default_instance_ = NULL;
+
+LoadRequest* LoadRequest::New() const {
+  return new LoadRequest;
+}
+
+void LoadRequest::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_tablet()) {
+      if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+        tablet_->clear();
+      }
+    }
+    dim_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool LoadRequest::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required string tablet = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_tablet()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->tablet().data(), this->tablet().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_dim;
+        break;
+      }
+
+      // required int32 dim = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_dim:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &dim_)));
+          set_has_dim();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void LoadRequest::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required string tablet = 1;
+  if (has_tablet()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->tablet().data(), this->tablet().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->tablet(), output);
+  }
+
+  // required int32 dim = 2;
+  if (has_dim()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->dim(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* LoadRequest::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required string tablet = 1;
+  if (has_tablet()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->tablet().data(), this->tablet().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->tablet(), target);
+  }
+
+  // required int32 dim = 2;
+  if (has_dim()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->dim(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int LoadRequest::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required string tablet = 1;
+    if (has_tablet()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->tablet());
+    }
+
+    // required int32 dim = 2;
+    if (has_dim()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->dim());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void LoadRequest::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const LoadRequest* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const LoadRequest*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void LoadRequest::MergeFrom(const LoadRequest& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_tablet()) {
+      set_tablet(from.tablet());
+    }
+    if (from.has_dim()) {
+      set_dim(from.dim());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void LoadRequest::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void LoadRequest::CopyFrom(const LoadRequest& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool LoadRequest::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void LoadRequest::Swap(LoadRequest* other) {
+  if (other != this) {
+    std::swap(tablet_, other->tablet_);
+    std::swap(dim_, other->dim_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata LoadRequest::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = LoadRequest_descriptor_;
+  metadata.reflection = LoadRequest_reflection_;
   return metadata;
 }
 

@@ -44,28 +44,33 @@ void rpcz_protobuf_AddDesc_tabletserver_2eproto() {
     "\n\022tabletserver.proto\"!\n\003Box\022\r\n\005start\030\001 \003"
     "(\001\022\013\n\003end\030\002 \003(\001\"\'\n\003Row\022\021\n\003box\030\001 \002(\0132\004.Bo"
     "x\022\r\n\005value\030\002 \002(\014\"\"\n\005Table\022\014\n\004name\030\001 \002(\t\022"
-    "\013\n\003dim\030\002 \002(\005\"\250\001\n\006Status\022$\n\006status\030\001 \002(\0162"
-    "\024.Status.StatusValues\"x\n\014StatusValues\022\013\n"
-    "\007Success\020\000\022\022\n\016WrongDimension\020\001\022\020\n\014NoSuch"
-    "Tablet\020\002\022\r\n\tNoSuchRow\020\003\022\016\n\nServerDown\020\004\022"
-    "\026\n\022CouldNotFindTablet\020\005\"3\n\rInsertRequest"
-    "\022\016\n\006tablet\030\001 \002(\t\022\022\n\004data\030\002 \002(\0132\004.Row\"2\n\r"
-    "RemoveRequest\022\016\n\006tablet\030\001 \002(\t\022\021\n\003key\030\002 \002"
-    "(\0132\004.Box\"F\n\014QueryRequest\022\016\n\006tablet\030\001 \002(\t"
-    "\022\023\n\005query\030\002 \002(\0132\004.Box\022\021\n\tis_within\030\003 \002(\010"
-    "\"\?\n\rQueryResponse\022\027\n\006status\030\001 \002(\0132\007.Stat"
-    "us\022\025\n\007results\030\002 \003(\0132\004.Row\"\r\n\013ListRequest"
-    "\".\n\021TabletDescription\022\014\n\004name\030\001 \002(\t\022\013\n\003d"
-    "im\030\002 \002(\005\"3\n\014ListResponse\022#\n\007results\030\001 \003("
-    "\0132\022.TabletDescription\"u\n\nTabletInfo\022\016\n\006s"
-    "erver\030\001 \002(\t\022\014\n\004name\030\002 \002(\t\022\027\n\017must_cross_"
-    "dims\030\003 \003(\005\022\027\n\017must_cross_vals\030\004 \003(\001\022\027\n\006s"
-    "tatus\030\005 \001(\0132\007.Status2\317\001\n\023TabletServerSer"
-    "vice\022\036\n\013CreateTable\022\006.Table\032\007.Status\022!\n\006"
-    "Insert\022\016.InsertRequest\032\007.Status\022!\n\006Remov"
-    "e\022\016.RemoveRequest\032\007.Status\022&\n\005Query\022\r.Qu"
-    "eryRequest\032\016.QueryResponse\022*\n\013ListTablet"
-    "s\022\014.ListRequest\032\r.ListResponse", 990);
+    "\013\n\003dim\030\002 \002(\005\"\334\001\n\006Status\022$\n\006status\030\001 \002(\0162"
+    "\024.Status.StatusValues\"\253\001\n\014StatusValues\022\013"
+    "\n\007Success\020\000\022\022\n\016WrongDimension\020\001\022\020\n\014NoSuc"
+    "hTablet\020\002\022\r\n\tNoSuchRow\020\003\022\016\n\nServerDown\020\004"
+    "\022\026\n\022CouldNotFindTablet\020\005\022\016\n\nNoSuchFile\020\006"
+    "\022\020\n\014HfsReadError\020\007\022\017\n\013CorruptFile\020\010\"\037\n\rU"
+    "nLoadRequest\022\016\n\006tablet\030\001 \002(\t\"*\n\013LoadRequ"
+    "est\022\016\n\006tablet\030\001 \002(\t\022\013\n\003dim\030\002 \002(\005\"3\n\rInse"
+    "rtRequest\022\016\n\006tablet\030\001 \002(\t\022\022\n\004data\030\002 \002(\0132"
+    "\004.Row\"2\n\rRemoveRequest\022\016\n\006tablet\030\001 \002(\t\022\021"
+    "\n\003key\030\002 \002(\0132\004.Box\"F\n\014QueryRequest\022\016\n\006tab"
+    "let\030\001 \002(\t\022\023\n\005query\030\002 \002(\0132\004.Box\022\021\n\tis_wit"
+    "hin\030\003 \002(\010\"\?\n\rQueryResponse\022\027\n\006status\030\001 \002"
+    "(\0132\007.Status\022\025\n\007results\030\002 \003(\0132\004.Row\"\r\n\013Li"
+    "stRequest\".\n\021TabletDescription\022\014\n\004name\030\001"
+    " \002(\t\022\013\n\003dim\030\002 \002(\005\"3\n\014ListResponse\022#\n\007res"
+    "ults\030\001 \003(\0132\022.TabletDescription\"u\n\nTablet"
+    "Info\022\016\n\006server\030\001 \002(\t\022\014\n\004name\030\002 \002(\t\022\027\n\017mu"
+    "st_cross_dims\030\003 \003(\005\022\027\n\017must_cross_vals\030\004"
+    " \003(\001\022\027\n\006status\030\005 \001(\0132\007.Status2\235\002\n\023Tablet"
+    "ServerService\022\036\n\013CreateTable\022\006.Table\032\007.S"
+    "tatus\022!\n\006Insert\022\016.InsertRequest\032\007.Status"
+    "\022!\n\006Remove\022\016.RemoveRequest\032\007.Status\022&\n\005Q"
+    "uery\022\r.QueryRequest\032\016.QueryResponse\022*\n\013L"
+    "istTablets\022\014.ListRequest\032\r.ListResponse\022"
+    "#\n\nLoadTablet\022\014.LoadRequest\032\007.Status\022\'\n\014"
+    "UnLoadTablet\022\016.UnLoadRequest\032\007.Status", 1197);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "tabletserver.proto", &protobuf_RegisterTypes);
   ::google::protobuf::internal::OnShutdown(&rpcz_protobuf_ShutdownFile_tabletserver_2eproto);
@@ -115,6 +120,18 @@ void TabletServerService::ListTablets(const ::ListRequest&,
               "Method ListTablets() not implemented.");
 }
 
+void TabletServerService::LoadTablet(const ::LoadRequest&,
+                         ::rpcz::reply< ::Status> reply) {
+  reply.Error(::rpcz::application_error::METHOD_NOT_IMPLEMENTED,
+              "Method LoadTablet() not implemented.");
+}
+
+void TabletServerService::UnLoadTablet(const ::UnLoadRequest&,
+                         ::rpcz::reply< ::Status> reply) {
+  reply.Error(::rpcz::application_error::METHOD_NOT_IMPLEMENTED,
+              "Method UnLoadTablet() not implemented.");
+}
+
 void TabletServerService::call_method(const ::google::protobuf::MethodDescriptor* method,
                              const ::google::protobuf::Message& request,
                              ::rpcz::server_channel* channel) {
@@ -145,6 +162,16 @@ void TabletServerService::call_method(const ::google::protobuf::MethodDescriptor
           *::google::protobuf::down_cast<const ::ListRequest*>(&request),
           ::rpcz::reply< ::ListResponse>(channel));
       break;
+    case 5:
+      LoadTablet(
+          *::google::protobuf::down_cast<const ::LoadRequest*>(&request),
+          ::rpcz::reply< ::Status>(channel));
+      break;
+    case 6:
+      UnLoadTablet(
+          *::google::protobuf::down_cast<const ::UnLoadRequest*>(&request),
+          ::rpcz::reply< ::Status>(channel));
+      break;
     default:
       GOOGLE_LOG(FATAL) << "Bad method index; this should never happen.";
       break;
@@ -165,6 +192,10 @@ const ::google::protobuf::Message& TabletServerService::GetRequestPrototype(
       return ::QueryRequest::default_instance();
     case 4:
       return ::ListRequest::default_instance();
+    case 5:
+      return ::LoadRequest::default_instance();
+    case 6:
+      return ::UnLoadRequest::default_instance();
     default:
       GOOGLE_LOG(FATAL) << "Bad method index; this should never happen.";
       return *reinterpret_cast< ::google::protobuf::Message*>(NULL);
@@ -185,6 +216,10 @@ const ::google::protobuf::Message& TabletServerService::GetResponsePrototype(
       return ::QueryResponse::default_instance();
     case 4:
       return ::ListResponse::default_instance();
+    case 5:
+      return ::Status::default_instance();
+    case 6:
+      return ::Status::default_instance();
     default:
       GOOGLE_LOG(FATAL) << "Bad method index; this should never happen.";
       return *reinterpret_cast< ::google::protobuf::Message*>(NULL);
@@ -303,6 +338,48 @@ void TabletServerService_Stub::ListTablets(const ::ListRequest& request,
   rpc.set_deadline_ms(deadline_ms);
   channel_->call_method(service_name_,
                         TabletServerService::descriptor()->method(4),
+                        request, response, &rpc, NULL);
+  rpc.wait();
+  if (!rpc.ok()) {
+    throw ::rpcz::rpc_error(rpc);
+  }
+}
+void TabletServerService_Stub::LoadTablet(const ::LoadRequest& request,
+                              ::Status* response,
+                              ::rpcz::rpc* rpc,
+                              ::rpcz::closure* done) {
+  channel_->call_method(service_name_,
+                        TabletServerService::descriptor()->method(5),
+                        request, response, rpc, done);
+}
+void TabletServerService_Stub::LoadTablet(const ::LoadRequest& request,
+                              ::Status* response,
+                              long deadline_ms) {
+  ::rpcz::rpc rpc;
+  rpc.set_deadline_ms(deadline_ms);
+  channel_->call_method(service_name_,
+                        TabletServerService::descriptor()->method(5),
+                        request, response, &rpc, NULL);
+  rpc.wait();
+  if (!rpc.ok()) {
+    throw ::rpcz::rpc_error(rpc);
+  }
+}
+void TabletServerService_Stub::UnLoadTablet(const ::UnLoadRequest& request,
+                              ::Status* response,
+                              ::rpcz::rpc* rpc,
+                              ::rpcz::closure* done) {
+  channel_->call_method(service_name_,
+                        TabletServerService::descriptor()->method(6),
+                        request, response, rpc, done);
+}
+void TabletServerService_Stub::UnLoadTablet(const ::UnLoadRequest& request,
+                              ::Status* response,
+                              long deadline_ms) {
+  ::rpcz::rpc rpc;
+  rpc.set_deadline_ms(deadline_ms);
+  channel_->call_method(service_name_,
+                        TabletServerService::descriptor()->method(6),
                         request, response, &rpc, NULL);
   rpc.wait();
   if (!rpc.ok()) {

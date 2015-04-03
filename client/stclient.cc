@@ -23,6 +23,40 @@ void list_tablets(TabletServerService_Stub* stub, int argc, char** argv) {
   }
 }
 
+void load(TabletServerService_Stub* stub, int argc, char** argv) {
+  LoadRequest request;
+  Status response;
+  if (argc!=2) {
+    cout << "Usage: load server:port tablet dimension\n";
+    return;
+  }
+  request.set_tablet(argv[0]);
+  request.set_dim(atoi(argv[1]));
+  try {
+    stub->LoadTablet(request, &response, 5000);
+    cout << Status::StatusValues_Name(response.status()) << endl;
+  } catch (rpcz::rpc_error &e) {
+    cout << "Error: " << e.what() << endl;;
+  }
+}
+
+void unload(TabletServerService_Stub* stub, int argc, char** argv) {
+  UnLoadRequest request;
+  Status response;
+  if (argc!=1) {
+    cout << "Usage: load server:port tablet\n";
+    return;
+  }
+  request.set_tablet(argv[0]);
+  try {
+    stub->UnLoadTablet(request, &response, 5000);
+    cout << Status::StatusValues_Name(response.status()) << endl;
+  } catch (rpcz::rpc_error &e) {
+    cout << "Error: " << e.what() << endl;;
+  }
+}
+
+
 void insert(TabletServerService_Stub* stub, int argc, char** argv) {
   InsertRequest request;
   Status response;
@@ -183,7 +217,9 @@ map<string, callback> dbgops = {
   {"dbginsert", insert},
   {"dbgremove", remove},
   {"dbgquery", query},
-  {"dbgcreate", create}
+  {"dbgcreate", create},
+  {"dbgload", load},
+  {"dbgunload", unload}
 };
 
 typedef void (*callbackTable) (TableStub*, int, char**);

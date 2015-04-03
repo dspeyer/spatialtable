@@ -2,6 +2,7 @@
 #include <map>
 #include <vector>
 #include <rpcz/rpcz.hpp>
+#include <boost/archive/archive_exception.hpp>
 #include "../common/gen/tabletserver.pb.h"
 #include "../common/gen/tabletserver.rpcz.h"
 #include "../common/utils.h"
@@ -140,6 +141,57 @@ class TabletServerServiceImpl : public TabletServerService {
     reply.send(response);
   }
 
+  virtual void UnLoadTablet(const UnLoadRequest& request, rpcz::reply<Status> reply) {
+    Status response;
+    auto it = tablets.find(request.tablet());
+    if (it==tablets.end()) {
+      response.set_status(Status::NoSuchTablet);
+      reply.send(response);
+      return;
+    }
+    tablet *t = it->second;
+    t->save();
+    TableStub stub(t->get_table(), application);
+    auto status = stub.Remove(t->get_borders(), t->get_layer()-1);
+    if (status!=Status::Success) {
+      std::cerr << "Failed to remove old " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
+    }
+    tablets.erase(it);
+    delete t;
+    response.set_status(Status::Success);
+    reply.send(response);
+  }
+
+  virtual void LoadTablet(const LoadRequest& request, rpcz::reply<Status> reply) {
+    Status response;
+    tablet * t = tablet::New("",request.dim(),2);
+    if (t==NULL) {
+      response.set_status(Status::WrongDimension);
+      reply.send(response);
+      return;
+    }
+    try {
+      auto status = t->load(request.tablet());
+      if (status!=Status::Success) {
+	response.set_status(status);
+	reply.send(response);
+	return;
+      }
+    } catch (typename boost::archive::archive_exception &e) {
+      std::cerr << e.what() << std::endl;
+      response.set_status(Status::CorruptFile);
+      reply.send(response);
+      return;
+    }
+    tablets[t->get_name()]=t;
+    TableStub stub(t->get_table(), application);
+    auto status = stub.Insert(t->get_borders(), tablet_description(t), t->get_layer()-1);
+    if (status!=Status::Success) {
+      std::cerr << "Failed to insert " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
+    }
+    response.set_status(Status::Success);
+    reply.send(response);
+  }
 };
 
 int main(int argc, char **argv) {

@@ -21,8 +21,20 @@ message Status {
     NoSuchRow = 3;
     ServerDown = 4;
     CouldNotFindTablet = 5;
+    NoSuchFile = 6;
+    HfsReadError = 7;
+    CorruptFile = 8;
   }
   required StatusValues status = 1;
+}
+
+message UnLoadRequest {
+  required string tablet = 1;	
+}
+
+message LoadRequest {
+  required string tablet = 1;	
+  required int32 dim = 2;
 }
 
 message InsertRequest {
@@ -63,6 +75,8 @@ service TabletServerService {
   rpc Remove(RemoveRequest) returns(Status);
   rpc Query(QueryRequest) returns(QueryResponse);
   rpc ListTablets(ListRequest) returns(ListResponse);
+  rpc LoadTablet(LoadRequest) returns(Status);
+  rpc UnLoadTablet(UnLoadRequest) returns(Status);
 }
 
 message TabletInfo {

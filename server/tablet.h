@@ -11,7 +11,7 @@ class tablet {
   virtual void insert(const /*protobuf*/ Box& k, const std::string& v) = 0;
   virtual bool remove(const /*protobuf*/ Box&) = 0;
   virtual void save() = 0;
-  virtual void load(const std::string& fileName) = 0;
+  virtual Status::StatusValues load(const std::string& fileName) = 0;
   virtual int get_size() = 0;
   virtual int get_dim() = 0;
   virtual std::vector<tablet*> split() = 0;

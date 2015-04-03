@@ -48,15 +48,6 @@ void serialize(ARCHIVE& ar, boost::geometry::model::box<POINT>& b, unsigned int 
 
 template<int DIM>
 class tabletImpl : public tablet{
- friend class boost::serialization::access;
- template<class Archive>
- void serialize(Archive &ar, const unsigned int version)
-{
-  ar << table;
-  ar << rtree;
-  ar << borders;
-}
-
  public:
   typedef typename geom<DIM>::point point;
   typedef typename geom<DIM>::box box;
@@ -236,6 +227,14 @@ class tabletImpl : public tablet{
   //std::ofstream ofs("test3"); //name of tablet
   std::ostringstream sfs;
   boost::archive::text_oarchive oa(sfs);
+  int dim=DIM; // I blame boost::archive
+  oa << dim << table << layer << must_cross;
+  std::string serialborders;
+  int size=borders.ByteSize();
+  serialborders.resize(size);
+  borders.SerializeToArray(const_cast<char*>(serialborders.c_str()), size);
+  oa << size;
+  oa.save_binary(serialborders.c_str(), size);
   std::vector<value> v;
   rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
   oa << v;
@@ -268,7 +267,7 @@ class tabletImpl : public tablet{
  
  }
 
-virtual void load(const std::string& file){
+virtual Status::StatusValues load(const std::string& file){
   //TODO:  load tablet name file from args
   hdfsFS fs=hdfsConnect("default",0);
   std::string rp = "/tablets/" +file;
@@ -276,14 +275,13 @@ virtual void load(const std::string& file){
   //char readPath[100] = "/tablets/test1";
   int exists = hdfsExists(fs, readPath);
   if (exists){
-    fprintf(stderr, "Failed to validate existance of %s\n", readPath);
-   }
+    return Status::NoSuchFile;
+  }
   
   hdfsFile readFile = hdfsOpenFile(fs, readPath, O_RDONLY, 0, 0, 0);
  
   if(!readFile){
-    fprintf(stderr, "Failed to open %s for reading\n", readPath);
-   exit(-1);
+    return Status::HfsReadError;
    }
   
   int bytesToRead = hdfsAvailable(fs, readFile);
@@ -292,12 +290,24 @@ virtual void load(const std::string& file){
   
   std::istringstream ifs(buffer);
   boost::archive::text_iarchive ia(ifs);
+  int dim;
+  ia >> dim >> table >> layer >> must_cross;
+  if (dim!=DIM) {
+    return Status::WrongDimension;
+  }
+  int size;
+  ia >> size;
+  std::string serialborders;
+  serialborders.resize(size);
+  ia.load_binary((void*)(serialborders.c_str()), size);
+  borders.ParseFromString(serialborders);
   std::vector<value> v;
   ia >> v;	
   for(int i = 0; i < v.size(); i++){
 	rtree.insert(v[i]);
    }
- }
+  return Status::Success;
+}
 
   virtual void mostly_fill_tabletinfo(TabletInfo* ti) {
     ti->set_name(get_name());

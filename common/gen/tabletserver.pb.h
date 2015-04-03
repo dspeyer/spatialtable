@@ -36,6 +36,8 @@ class Box;
 class Row;
 class Table;
 class Status;
+class UnLoadRequest;
+class LoadRequest;
 class InsertRequest;
 class RemoveRequest;
 class QueryRequest;
@@ -51,11 +53,14 @@ enum Status_StatusValues {
   Status_StatusValues_NoSuchTablet = 2,
   Status_StatusValues_NoSuchRow = 3,
   Status_StatusValues_ServerDown = 4,
-  Status_StatusValues_CouldNotFindTablet = 5
+  Status_StatusValues_CouldNotFindTablet = 5,
+  Status_StatusValues_NoSuchFile = 6,
+  Status_StatusValues_HfsReadError = 7,
+  Status_StatusValues_CorruptFile = 8
 };
 bool Status_StatusValues_IsValid(int value);
 const Status_StatusValues Status_StatusValues_StatusValues_MIN = Status_StatusValues_Success;
-const Status_StatusValues Status_StatusValues_StatusValues_MAX = Status_StatusValues_CouldNotFindTablet;
+const Status_StatusValues Status_StatusValues_StatusValues_MAX = Status_StatusValues_CorruptFile;
 const int Status_StatusValues_StatusValues_ARRAYSIZE = Status_StatusValues_StatusValues_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Status_StatusValues_descriptor();
@@ -423,6 +428,9 @@ class Status : public ::google::protobuf::Message {
   static const StatusValues NoSuchRow = Status_StatusValues_NoSuchRow;
   static const StatusValues ServerDown = Status_StatusValues_ServerDown;
   static const StatusValues CouldNotFindTablet = Status_StatusValues_CouldNotFindTablet;
+  static const StatusValues NoSuchFile = Status_StatusValues_NoSuchFile;
+  static const StatusValues HfsReadError = Status_StatusValues_HfsReadError;
+  static const StatusValues CorruptFile = Status_StatusValues_CorruptFile;
   static inline bool StatusValues_IsValid(int value) {
     return Status_StatusValues_IsValid(value);
   }
@@ -471,6 +479,190 @@ class Status : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Status* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class UnLoadRequest : public ::google::protobuf::Message {
+ public:
+  UnLoadRequest();
+  virtual ~UnLoadRequest();
+
+  UnLoadRequest(const UnLoadRequest& from);
+
+  inline UnLoadRequest& operator=(const UnLoadRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const UnLoadRequest& default_instance();
+
+  void Swap(UnLoadRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  UnLoadRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const UnLoadRequest& from);
+  void MergeFrom(const UnLoadRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string tablet = 1;
+  inline bool has_tablet() const;
+  inline void clear_tablet();
+  static const int kTabletFieldNumber = 1;
+  inline const ::std::string& tablet() const;
+  inline void set_tablet(const ::std::string& value);
+  inline void set_tablet(const char* value);
+  inline void set_tablet(const char* value, size_t size);
+  inline ::std::string* mutable_tablet();
+  inline ::std::string* release_tablet();
+  inline void set_allocated_tablet(::std::string* tablet);
+
+  // @@protoc_insertion_point(class_scope:UnLoadRequest)
+ private:
+  inline void set_has_tablet();
+  inline void clear_has_tablet();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* tablet_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_tabletserver_2eproto();
+  friend void protobuf_AssignDesc_tabletserver_2eproto();
+  friend void protobuf_ShutdownFile_tabletserver_2eproto();
+
+  void InitAsDefaultInstance();
+  static UnLoadRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class LoadRequest : public ::google::protobuf::Message {
+ public:
+  LoadRequest();
+  virtual ~LoadRequest();
+
+  LoadRequest(const LoadRequest& from);
+
+  inline LoadRequest& operator=(const LoadRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const LoadRequest& default_instance();
+
+  void Swap(LoadRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  LoadRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const LoadRequest& from);
+  void MergeFrom(const LoadRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string tablet = 1;
+  inline bool has_tablet() const;
+  inline void clear_tablet();
+  static const int kTabletFieldNumber = 1;
+  inline const ::std::string& tablet() const;
+  inline void set_tablet(const ::std::string& value);
+  inline void set_tablet(const char* value);
+  inline void set_tablet(const char* value, size_t size);
+  inline ::std::string* mutable_tablet();
+  inline ::std::string* release_tablet();
+  inline void set_allocated_tablet(::std::string* tablet);
+
+  // required int32 dim = 2;
+  inline bool has_dim() const;
+  inline void clear_dim();
+  static const int kDimFieldNumber = 2;
+  inline ::google::protobuf::int32 dim() const;
+  inline void set_dim(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:LoadRequest)
+ private:
+  inline void set_has_tablet();
+  inline void clear_has_tablet();
+  inline void set_has_dim();
+  inline void clear_has_dim();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* tablet_;
+  ::google::protobuf::int32 dim_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_tabletserver_2eproto();
+  friend void protobuf_AssignDesc_tabletserver_2eproto();
+  friend void protobuf_ShutdownFile_tabletserver_2eproto();
+
+  void InitAsDefaultInstance();
+  static LoadRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1560,6 +1752,176 @@ inline void Status::set_status(::Status_StatusValues value) {
   assert(::Status_StatusValues_IsValid(value));
   set_has_status();
   status_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// UnLoadRequest
+
+// required string tablet = 1;
+inline bool UnLoadRequest::has_tablet() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void UnLoadRequest::set_has_tablet() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void UnLoadRequest::clear_has_tablet() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void UnLoadRequest::clear_tablet() {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    tablet_->clear();
+  }
+  clear_has_tablet();
+}
+inline const ::std::string& UnLoadRequest::tablet() const {
+  return *tablet_;
+}
+inline void UnLoadRequest::set_tablet(const ::std::string& value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void UnLoadRequest::set_tablet(const char* value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void UnLoadRequest::set_tablet(const char* value, size_t size) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* UnLoadRequest::mutable_tablet() {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  return tablet_;
+}
+inline ::std::string* UnLoadRequest::release_tablet() {
+  clear_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tablet_;
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void UnLoadRequest::set_allocated_tablet(::std::string* tablet) {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    delete tablet_;
+  }
+  if (tablet) {
+    set_has_tablet();
+    tablet_ = tablet;
+  } else {
+    clear_has_tablet();
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// LoadRequest
+
+// required string tablet = 1;
+inline bool LoadRequest::has_tablet() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void LoadRequest::set_has_tablet() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void LoadRequest::clear_has_tablet() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void LoadRequest::clear_tablet() {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    tablet_->clear();
+  }
+  clear_has_tablet();
+}
+inline const ::std::string& LoadRequest::tablet() const {
+  return *tablet_;
+}
+inline void LoadRequest::set_tablet(const ::std::string& value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void LoadRequest::set_tablet(const char* value) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(value);
+}
+inline void LoadRequest::set_tablet(const char* value, size_t size) {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  tablet_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* LoadRequest::mutable_tablet() {
+  set_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    tablet_ = new ::std::string;
+  }
+  return tablet_;
+}
+inline ::std::string* LoadRequest::release_tablet() {
+  clear_has_tablet();
+  if (tablet_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tablet_;
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void LoadRequest::set_allocated_tablet(::std::string* tablet) {
+  if (tablet_ != &::google::protobuf::internal::kEmptyString) {
+    delete tablet_;
+  }
+  if (tablet) {
+    set_has_tablet();
+    tablet_ = tablet;
+  } else {
+    clear_has_tablet();
+    tablet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 dim = 2;
+inline bool LoadRequest::has_dim() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void LoadRequest::set_has_dim() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void LoadRequest::clear_has_dim() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void LoadRequest::clear_dim() {
+  dim_ = 0;
+  clear_has_dim();
+}
+inline ::google::protobuf::int32 LoadRequest::dim() const {
+  return dim_;
+}
+inline void LoadRequest::set_dim(::google::protobuf::int32 value) {
+  set_has_dim();
+  dim_ = value;
 }
 
 // -------------------------------------------------------------------
