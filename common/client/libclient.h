@@ -13,9 +13,10 @@ class TableStub {
   TableStub(const std::string& _table, rpcz::application* _application);
   Status::StatusValues Insert(const Box& b, const std::string& value, int layer);
   Status::StatusValues Remove(const Box& b, int layer);
+  QueryResponse Query(const Box& b, bool is_within);
  private:
-  TabletInfo findTabletWithBox(const Box& b, int layer, TabletInfo in);
-  TabletInfo findTabletWithBox(const Box& b, int layer);
+  std::vector<TabletInfo> findTabletWithBox(const Box& b, int layer, TabletInfo in, bool justone);
+  std::vector<TabletInfo> findTabletWithBox(const Box& b, int layer, bool justone);
   TabletServerService_Stub* getStub(const std::string& server);
   std::string table;
 };

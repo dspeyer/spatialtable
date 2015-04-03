@@ -188,6 +188,33 @@ void query(TabletServerService_Stub* stub, int argc, char** argv) {
   }
 }
 
+void tableQuery(TableStub* stub, int argc, char** argv) {
+  if (argc<3 || argc%2==0) {
+    cout << "Usage: query table [within|intersect] start_0 end_0 start_1 end_1...\n";
+    return;
+  }
+  string type=argv[0];
+  if (type!="within" && type!="intersect") {
+    cout << "Unknown query type: '" << type << "' (use 'within' or 'intersect')\n";
+    return;
+  }
+  Box q;
+  for (int i=1; i<argc-1; i+=2) {
+    q.add_start(atof(argv[i]));
+    q.add_end(atof(argv[i+1]));
+  }
+  QueryResponse response = stub->Query(q, type=="within");
+  if (response.status().status() == Status::Success) {
+    cout << "Matching rows are:\n";
+    for (int i=0; i<response.results_size(); i++) {
+      cout << "  " << stringFromBox(response.results(i).box()) << "=> '" << response.results(i).value() << "'\n";
+    }
+  } else {
+    cout << "Error: " << Status::StatusValues_Name(response.status().status()) << endl;
+  }
+}
+
+
 void create(TabletServerService_Stub* stub, int argc, char** argv) {
   if (argc!=2) {
     cout << "Usage: create tablename dimension\n";
@@ -227,7 +254,8 @@ typedef void (*callbackTable) (TableStub*, int, char**);
 map<string, callbackTable> ops = {
   {"insert", tableInsert},
   {"multiinsert", tableMultiInsert},
-  {"remove", tableRemove}
+  {"remove", tableRemove},
+  {"query", tableQuery}
 };
 
 int main(int argc, char ** argv) {
