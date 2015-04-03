@@ -8,6 +8,7 @@
 #include "../common/utils.h"
 #include "../common/client/libclient.h"
 #include "tablet.h"
+#include "hdfs.h"  // for hdfs access
 
 using namespace std;
 
@@ -44,7 +45,11 @@ class TabletServerServiceImpl : public TabletServerService {
     tablets[md0->get_name()]=md0;
     meta->insert(content->get_borders(), tablet_description(content));
     md0->insert(meta->get_borders(), tablet_description(meta));
-
+    hdfsFS fs = hdfsConnect("default", 0);
+    hdfsFile writeFile = hdfsOpenFile(fs, ("/md0/"+content->get_table()).c_str(), O_WRONLY|O_CREAT, 0, 0, 0);
+    hdfsWrite(fs, writeFile, (void*)my_hostport.c_str(), my_hostport.length());
+    hdfsFlush(fs, writeFile);
+    hdfsCloseFile(fs, writeFile);
     response.set_status(Status::Success);
     reply.send(response);
   }
@@ -184,10 +189,18 @@ class TabletServerServiceImpl : public TabletServerService {
       return;
     }
     tablets[t->get_name()]=t;
-    TableStub stub(t->get_table(), application);
-    auto status = stub.Insert(t->get_borders(), tablet_description(t), t->get_layer()-1);
-    if (status!=Status::Success) {
-      std::cerr << "Failed to insert " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
+    if (t->get_layer() > 0) {
+      TableStub stub(t->get_table(), application);
+      auto status = stub.Insert(t->get_borders(), tablet_description(t), t->get_layer()-1);
+      if (status!=Status::Success) {
+	std::cerr << "Failed to insert " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
+      }
+    } else {
+      hdfsFS fs = hdfsConnect("default", 0);
+      hdfsFile writeFile = hdfsOpenFile(fs, ("/md0/"+t->get_table()).c_str(), O_WRONLY|O_CREAT, 0, 0, 0);
+      hdfsWrite(fs, writeFile, (void*)my_hostport.c_str(), my_hostport.length());
+      hdfsFlush(fs, writeFile);
+      hdfsCloseFile(fs, writeFile);
     }
     response.set_status(Status::Success);
     reply.send(response);

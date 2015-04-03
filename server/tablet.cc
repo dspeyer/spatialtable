@@ -2,8 +2,8 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
-#include <boost/archive/text_oarchive.hpp> // for serialization
-#include <boost/archive/text_iarchive.hpp> // for serialization
+#include <boost/archive/binary_oarchive.hpp> // for serialization
+#include <boost/archive/binary_iarchive.hpp> // for serialization
 #include <cstdlib>
 #include <vector>
 #include <utility>
@@ -226,7 +226,7 @@ class tabletImpl : public tablet{
   // create the archive file
   //std::ofstream ofs("test3"); //name of tablet
   std::ostringstream sfs;
-  boost::archive::text_oarchive oa(sfs);
+  boost::archive::binary_oarchive oa(sfs);
   int dim=DIM; // I blame boost::archive
   oa << dim << table << layer << must_cross;
   std::string serialborders;
@@ -285,11 +285,14 @@ virtual Status::StatusValues load(const std::string& file){
    }
   
   int bytesToRead = hdfsAvailable(fs, readFile);
-  char *buffer = (char *)malloc(bytesToRead);
-  tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer, bytesToRead);
+  std::string buffer;
+  buffer.resize(bytesToRead);
+  tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
   
+  std::cout << "reading " << bytesToRead << " bytes from '" << buffer << "'\n";
+
   std::istringstream ifs(buffer);
-  boost::archive::text_iarchive ia(ifs);
+  boost::archive::binary_iarchive ia(ifs);
   int dim;
   ia >> dim >> table >> layer >> must_cross;
   if (dim!=DIM) {
@@ -306,6 +309,8 @@ virtual Status::StatusValues load(const std::string& file){
   for(int i = 0; i < v.size(); i++){
 	rtree.insert(v[i]);
    }
+  hdfsCloseFile(fs, readFile);
+
   return Status::Success;
 }
 

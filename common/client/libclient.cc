@@ -5,6 +5,7 @@
 #include "../gen/tabletserver.rpcz.h"
 #include "../utils.h"
 #include <iostream>
+#include "hdfs.h"
 
 static rpcz::application* application;
 static std::map<std::string, TabletServerService_Stub*> cache;
@@ -67,7 +68,14 @@ TabletInfo tabletInfoFromStatus(Status::StatusValues status) {
 
 TabletInfo TableStub::findTabletWithBox(const Box& b, int layer) {
   TabletInfo md0;
-  md0.set_server("localhost:5555"); // FIXME
+  hdfsFS fs=hdfsConnect("default",0);
+  hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
+  int bytesToRead = hdfsAvailable(fs, readFile);
+  std::string buffer;
+  buffer.resize(bytesToRead);
+  tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
+  hdfsCloseFile(fs, readFile);
+  md0.set_server(buffer); // FIXME
   md0.set_name("md0;;"+table);
   return findTabletWithBox(b, layer, md0);
 }
