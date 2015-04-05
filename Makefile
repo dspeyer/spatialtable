@@ -50,6 +50,9 @@ tablet_test: bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o
 
 # Misc
 
+midterm.pdf: midterm.tex
+	pdflatex midterm.tex
+
 clean:
 	rm bin/*.o
 	rm common/gen/*.h
