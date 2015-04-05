@@ -48,6 +48,18 @@ tablet_test: bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o
 	g++ -g -o tablet_test bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o ${LIBS}
 
 
+# Test
+
+tests/insertCommands: tests/starbucks.csv
+	cat tests/starbucks.csv  | sed 's/,/",/' | sed 's/^/  addStarbucks("/' | sed 's/$/);/' > tests/insertCommands
+
+bin/insertStarbucks.o: tests/insertStarbucks.cc tests/insertCommands common/client/libclient.h common/gen/tabletserver.pb.h
+	${COMPILE}  -o bin/insertStarbucks.o tests/insertStarbucks.cc
+
+insertStarbucks: bin/insertStarbucks.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
+	g++ -g -o insertStarbucks bin/insertStarbucks.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o  ${LIBS}
+
+
 # Misc
 
 midterm.pdf: midterm.tex
