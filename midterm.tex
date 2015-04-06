@@ -109,15 +109,13 @@ LibRPCZ is an open-source rpc client/server library using protobufs. It offers c
 
 Unfortunately, it uses a naive round-robin thread scheduler which can cause it to hang if too many RPCs take place before the first one completes. Special thanks to Dmitry Odzerikhoof that project for helping us to understand and work around this bug.
 
-\subsection{Test Cases}
-
 \section{Results}
 
 Thus far, our primary result is that the system works.  We have successfully run the database, distributed across two nodes, inserted data and run queries.
 
 We do have some basic performance data.  We took roughly 7000 Starbucks locations, spread across two nodes, and randomly queried for rectangles of up to 1/10 degree of lattitude and longitude, containing from 0 to 147 Starbucks ($\mu=12, \sigma=33$) and measured the elapsed time.  Times ranged from 5.2ms to 31.4ms ($\mu=9.7, \sigma=3.0$) with a single outlier of 63.7ms.  Query duration was uncorrelated ($r^2=0.16$) to the number of starbucks returned, and there was no sign of multimodality.
 
-\begin{figure}
+\begin{figure}[b]
 \includegraphics[width=3in]{querytimes}
 \caption{The cumulative probability function for elapsed time, omitting one outlyer}
 \end{figure}
