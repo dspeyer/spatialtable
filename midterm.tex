@@ -10,7 +10,7 @@
 \maketitle
 
 \section{The Problem}
-
+Current distributed databases only support fast queries to a single, scalar primary key. We propose a system that allows efficient queries based on a multidimensional key, using a fundamentally similar architecture. This has a variety of applications, both in literally spatial data and in more abstract spaces.
 \section{Related Work}
 
 \subsection{Distributed Databases}
@@ -23,11 +23,13 @@ There exist many single-node spatial databases, mostly based on rtrees or simila
 
 \subsection{Sample Database Systems}
 
-We chose three popular database management systems to investigate and evaluate their solutions to our proposed problem above. We chose these databases because they all seemed to the have the basics necessary to build such a system and we wanted to evaluate if they had indeed already solved our proposed problem or if at the very least we could leverage them to build a solution of our own. Our candidate database systems were MongoDB, HyperDex, and Hbase.
+We chose three popular database management systems to investigate and evaluate their solutions to our proposed problem. We chose these databases because they all seemed to have the basics necessary solve such problem and we wanted to evaluate if they had indeed already solved our proposed problem or if at the very least we could leverage them to build a solution of our own. Our candidate database systems were MongoDB, HyperDex, and Hbase.
 
 \subsection{MongoDB}
 
-MongoDB is currently the most popular of the so called document based NoSQL database management system. These systems work similarly to key-value stores, but instead store key-document pairs. These documents can contain any arbitrary piece of information, and can also have other documents nested within, allowing for much more complex structures to be achieved (ie. document within a document within a document). Additionally, MongoDB is distributed and has sharding built-in, and of particular interest to us, offers geospatial indexes and queries. However, MongoDB limits the geospatial indexes to either flat surfaces (Euclidean plane, 2d) or spherical Earth-like surfaces (2dsphere indexes) using longitude and latitude, and further prohibits geospatial indexes to be used as shard key indexes. Meaning it is impossible to use this geospatial index divide tables into `tablets' to be stored on different servers, so it limits the way the database can be distributed. Since MongoDB does not allow to scale to n-dimensions for indexes and severely limits the way the database can be distributed with geospatial indexes we concluded that indeed our proposed database system provides a much more flexible solution to our problem, and MongoDB is simply not suitable for solving the type of problems that we envisioned.
+MongoDB is currently the most popular of the so called document based NoSQL database management system. These systems work similarly to key-value stores, but instead store key-document pairs. These documents can contain any arbitrary piece of information, and can also have other documents nested within, allowing for much more complex structures to be achieved (ie. document within a document within a document). 
+
+Additionally, MongoDB is distributed and has sharding built-in, and of particular interest to us, offers geospatial indexes and queries. However, MongoDB limits the geospatial indexes to either flat surfaces (Euclidean plane, 2d) or spherical Earth-like surfaces (2dsphere indexes) using longitude and latitude, and further prohibits geospatial indexes to be used as shard key indexes. Meaning it is impossible to use this geospatial index divide tables into `tablets' to be stored on different servers, so it limits the way the database can be distributed. Since MongoDB does not allow to scale to n-dimensions for indexes and severely limits the way the database can be distributed with geospatial indexes we concluded that indeed our proposed database system provides a much more flexible solution to our problem, and MongoDB is simply not suitable for solving the type of problems that we envisioned.
 
 \subsection{HyperDex}
 
@@ -40,6 +42,8 @@ While hyperdex does support range queries, it requires that `objects' relative o
 \subsection{Hbase}
 
 HBase is a distributed column-oriented database built on top of HDFS. It is a NoSQL technology, which is not intended to replace RDBMS. HBase is designed for supporting store huge amounts of data and random real-time access to the data in indexed Hadoop file system.Tables in HBase are split into regions served by region servers. A table is composed of multiple column families. Each column family contain one or more columns. 
+
+There has been research conducted with HBase to provide a data model for large geospatial datasets called HGrid. Although, it seems to work well for geospatial 2d indexes, it seems to come with some very oppressive caveats. The techniques implemented to be able to handle range query processing are very computationally intensive, even on a cluster, and also requires prior knowledge of the type of data and how it is organized in the database to make accurate estimations in order to retrieve relative data points. This lack of flexibility forced us to abandon this database and continue with our own design.
 
 \section{Design}
 
@@ -79,7 +83,7 @@ Queries may be of the form `all boxes within this box' or `all boxes intersectin
 
 \subsection{Test Infrastructure}
 
-Currently our infrastructure consists of 4 KVM based virtual hosts each with 2 CPUs and 8GBs of RAM, running Ubuntu 14.04 LTS. Each VM runs a node on our distributed file system Hadoop File System (HDFS), and our code base is written in C++, using the various libraries outlined below.
+Currently our infrastructure consists of a four-node cluster of virtual machines with Ubuntu 14.04 LTS on KVM. Each VM runs a datanode on our distributed file system Hadoop File System (HDFS), and our code base is written in C++, using the various libraries outlined next.
 
 \subsection{Dependencies}
 
@@ -119,7 +123,7 @@ Our tabletservers support unloading tablets to hdfs and loading them back from i
 
 \subsection{Locking}
 
-Our system is subject to race condition corruption from simultaneous writes. We intend to write some simple locking to protect from this. We are not targetting ACID -- only the robustness of our internal data structures against races.
+Our system is subject to race condition corruption from simultaneous writes. We intend to write some simple locking to protect from this. We are not targeting ACID -- only the robustness of our internal data structures against races.
 
 \subsection{Optimizations}
 
@@ -137,5 +141,23 @@ More generally, we have not profiled our system, and there may be low-hanging op
 \subsection{Measurement}
 
 The biggest remaining task is not building but measurement. We intend to create a set of benchmarks of varying dimensionalities and distributions, then compare our system to the alternatives mentioned earlier on matching hardware.
+
+\section{Future Work}
+
+\subsection{Time Table}
+
+We envision our schedule for the rest of the semester as follows.
+
+\begin{itemize}
+\item Week of April 6th - Automatic Load Balancer 
+\item Week of April 12th - Provide some locking primitives
+\item Week of April 19th - Write more test cases to obtain measurements and optimize as much as possible
+\item Week of April 26th - Continue optimizing and taking measurements and finalize the demo and final presentation
+\item Week of May 4th - Write Final Report
+\item Week of May 11th - Finalize Final Report and Celebrate!
+
+
+\end{itemize}
+
 
 \end{document}
