@@ -62,7 +62,7 @@ insertStarbucks: bin/insertStarbucks.o bin/libclient.o bin/tabletserver.pb.o bin
 
 # Misc
 
-midterm.pdf: midterm.tex
+midterm.pdf: midterm.tex querytimes.png
 	pdflatex midterm.tex
 
 clean:
