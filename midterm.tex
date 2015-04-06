@@ -7,6 +7,9 @@
 \author{Daniel Speyer\\dls2192 \and Samuel Lee\\hsl2113 \and Peiran Hu\\ph2439}
 \title{SpatialTable: A Distributed Database for Multidimensional Queries}
 
+\pretolerance=10000
+
+
 \maketitle
 
 \section{The Problem}
@@ -19,7 +22,7 @@ The current standard for distributed databases begins by having a single primary
 
 \subsection{Spatial Databases}
 
-There exist many single-node spatial databases, mostly based on rtrees or similar structures. They are widely used in geographic applications, as a single node can hold a fairly large amount of data. Still, like all single-node systems, they have a cap on their scalability, and they are not robust against hardware failure.
+There exist many single-node spatial databases, mostly based on rtrees, quadtrees, or similar structures. They are widely used in geographic applications, as a single node can hold a fairly large amount of data. Still, like all single-node systems, they have a cap on their scalability, and they are not robust against hardware failure.
 
 \subsection{Sample Database Systems}
 
@@ -31,21 +34,25 @@ MongoDB is currently the most popular of the so called document based NoSQL data
 
 Additionally, MongoDB is distributed and has sharding built-in, and of particular interest to us, offers geospatial indexes and queries. However, MongoDB limits the geospatial indexes to either flat surfaces (Euclidean plane, 2d) or spherical Earth-like surfaces (2dsphere indexes) using longitude and latitude, and further prohibits geospatial indexes to be used as shard key indexes. Meaning it is impossible to use this geospatial index divide tables into `tablets' to be stored on different servers, so it limits the way the database can be distributed. Since MongoDB does not allow to scale to n-dimensions for indexes and severely limits the way the database can be distributed with geospatial indexes we concluded that indeed our proposed database system provides a much more flexible solution to our problem, and MongoDB is simply not suitable for solving the type of problems that we envisioned.
 
-\subsection{HyperDex}
-
-Hyperdex is based on a technique called ``hyperspace hashing''. First, each key attribute is `hashed'. I put this work in scare quotes because range queries require an order-preserving `hash' function. These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.
-
-According to the original hyperdex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, hyperdex recommends that dimensionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
-
-While hyperdex does support range queries, it requires that `objects' relative orders for the attribute must be preserved when mapped onto the hyperspace axis.' Since these attributes are not being hashed, but the attribute space is still divided statically, the system is at high risk of hot spots unless the data's distribution is well known in advance.
+MongoDB's spatial indexes are based on a technique called ``geohashing''.  Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  However, it requires the range and resolution of the data to be known in advance, does not handle higher dimensional spaces, requires complex calculations, and does not preserve locality perfectly, so some scanning and filtering is still required.  In practice, it tends to work acceptably on real-world data, but it is not a fully general and robust solution.
 
 \subsection{Hbase}
 
 HBase is a distributed column-oriented database built on top of HDFS. It is a NoSQL technology, which is not intended to replace RDBMS. HBase is designed for supporting store huge amounts of data and random real-time access to the data in indexed Hadoop file system.Tables in HBase are split into regions served by region servers. A table is composed of multiple column families. Each column family contain one or more columns. 
 
-There has been research conducted with HBase to provide a data model for large geospatial datasets called HGrid. Although, it seems to work well for geospatial 2d indexes, it seems to come with some very oppressive caveats. The techniques implemented to be able to handle range query processing are very computationally intensive, even on a cluster, and also requires prior knowledge of the type of data and how it is organized in the database to make accurate estimations in order to retrieve relative data points. This lack of flexibility forced us to abandon this database and continue with our own design.
+There has been research conducted with HBase to provide a data model for large geospatial datasets called HGrid. It uses a system called ``z-ordering quadtree linearization'', which is roughly the same as MongoDB's geohashing.  It has roughly the same strengths and weaknesses.
+
+\subsection{HyperDex}
+
+Hyperdex uses a different technique called ``hyperspace hashing''. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.
+
+According to the original hyperdex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, hyperdex recommends that dimensionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
+
+While hyperdex does support range queries, it requires that ``objects' relative orders for the attribute must be preserved when mapped onto the hyperspace axis.'' Since these attributes are not being hashed, but the attribute space is still divided statically, the system is at high risk of hot spots unless the data's distribution is well known in advance.
 
 \section{Design}
+
+Rather than layering on top of a 1-dimensional database, or design uses arbitrary-dimensional tablets as first-class members, giving full flexibility of dimension, range, resolution and distribution with no scan-and-filter needed for standard queries.\
 
 \subsection{General Design}
 
