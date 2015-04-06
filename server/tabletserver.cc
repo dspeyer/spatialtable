@@ -70,7 +70,7 @@ class TabletServerServiceImpl : public TabletServerService {
       return;
     }
     t->insert(request.data().box(), request.data().value());
-    if (t->get_size()>10 && t->get_layer()>0) {
+    if (t->get_size()>200 && t->get_layer()>0) {
       std::vector<tablet*> newt = t->split();
       if (newt.size()>0) {
 	TableStub stub(t->get_table(),application);
@@ -188,10 +188,14 @@ class TabletServerServiceImpl : public TabletServerService {
       reply.send(response);
       return;
     }
+    std::cout << "done with tablet stuff\n";
     tablets[t->get_name()]=t;
+    std::cout << "inserting self\n";
     if (t->get_layer() > 0) {
       TableStub stub(t->get_table(), application);
+      std::cout << "made stub\n";
       auto status = stub.Insert(t->get_borders(), tablet_description(t), t->get_layer()-1);
+      std::cout << "inserted into metadata\n";
       if (status!=Status::Success) {
 	std::cerr << "Failed to insert " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
       }
@@ -202,6 +206,7 @@ class TabletServerServiceImpl : public TabletServerService {
       hdfsFlush(fs, writeFile);
       hdfsCloseFile(fs, writeFile);
     }
+    std::cout << "done loading rpc\n";
     response.set_status(Status::Success);
     reply.send(response);
   }
@@ -209,7 +214,7 @@ class TabletServerServiceImpl : public TabletServerService {
 
 int main(int argc, char **argv) {
   rpcz::application::options opts;
-  opts.connection_manager_threads = 255;
+  opts.connection_manager_threads = 64;
   application = new rpcz::application(opts);
   string port;
   if (argc==2) {

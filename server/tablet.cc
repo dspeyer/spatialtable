@@ -289,15 +289,23 @@ virtual Status::StatusValues load(const std::string& file){
   buffer.resize(bytesToRead);
   tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
   
-  std::cout << "reading " << bytesToRead << " bytes from '" << buffer << "'\n";
+  //  std::cout << "reading " << bytesToRead << " bytes from '" << buffer << "'\n";
+
+  std::cout << "read data...\n";
 
   std::istringstream ifs(buffer);
   boost::archive::binary_iarchive ia(ifs);
   int dim;
   ia >> dim >> table >> layer >> must_cross;
+
+  std::cout << "parsed simple stuff...\n";
+
   if (dim!=DIM) {
     return Status::WrongDimension;
   }
+
+  std::cout << "right dimension...\n";
+
   int size;
   ia >> size;
   std::string serialborders;
@@ -305,11 +313,14 @@ virtual Status::StatusValues load(const std::string& file){
   ia.load_binary((void*)(serialborders.c_str()), size);
   borders.ParseFromString(serialborders);
   std::vector<value> v;
+  std::cout << "prepped vector...\n";
   ia >> v;	
+  std::cout << "read vector...\n";
   for(int i = 0; i < v.size(); i++){
 	rtree.insert(v[i]);
    }
   hdfsCloseFile(fs, readFile);
+  std::cout << "done loading\n";
 
   return Status::Success;
 }

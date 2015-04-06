@@ -23,6 +23,12 @@ TabletServerService_Stub* TableStub::getStub(const std::string& server) {
   return cache[server];
 }
 
+TableStub::~TableStub() {
+  /*  for (auto& i : cache) {
+    delete i.second;
+    }*/
+}
+
 Status::StatusValues TableStub::Insert(const Box& b, const std::string& value, int layer) {
   std::vector<TabletInfo> ti = findTabletWithBox(b, layer, true);
   if (ti[0].status().status()!=Status::Success) {
@@ -101,7 +107,7 @@ std::vector<TabletInfo> tabletInfoFromStatus(Status::StatusValues status) {
 
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bool justone) {
   TabletInfo md0;
-  hdfsFS fs=hdfsConnect("default",0);
+  static hdfsFS fs=hdfsConnect("default",0);
   hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
   int bytesToRead = hdfsAvailable(fs, readFile);
   std::string buffer;
