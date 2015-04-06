@@ -14,6 +14,7 @@ class TableStub {
   Status::StatusValues Insert(const Box& b, const std::string& value, int layer);
   Status::StatusValues Remove(const Box& b, int layer);
   QueryResponse Query(const Box& b, bool is_within);
+  ~TableStub();
  private:
   std::vector<TabletInfo> findTabletWithBox(const Box& b, int layer, TabletInfo in, bool justone);
   std::vector<TabletInfo> findTabletWithBox(const Box& b, int layer, bool justone);

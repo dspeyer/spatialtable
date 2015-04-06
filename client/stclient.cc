@@ -226,7 +226,7 @@ void create(TabletServerService_Stub* stub, int argc, char** argv) {
   request.set_dim(atoi(argv[1]));
   cout << "Creating table named '" << request.name() << "' with " << request.dim() << " dimensions...\n";
   try {
-    stub->CreateTable(request, &response, 1000);
+    stub->CreateTable(request, &response, 5000);
     if (response.status() == Status::Success) {
       cout << "...Success!\n";
     } else {
