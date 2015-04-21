@@ -107,6 +107,14 @@ std::vector<TabletInfo> tabletInfoFromStatus(Status::StatusValues status) {
 
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bool justone) {
   TabletInfo md0;
+  md0.set_name("md0;;"+table);
+  if (lastKnownMd0Server.size()) {
+    md0.set_server(lastKnownMd0Server);
+    std::vector<TabletInfo> ret = findTabletWithBox(b, layer, md0, justone);
+    if (!ret.size() || ret[0].status().status() != Status::NoSuchTablet) {
+      return ret;
+    }
+  }
   static hdfsFS fs=hdfsConnect("default",0);
   hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
   int bytesToRead = hdfsAvailable(fs, readFile);
@@ -115,7 +123,7 @@ std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bo
   tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
   hdfsCloseFile(fs, readFile);
   md0.set_server(buffer);
-  md0.set_name("md0;;"+table);
+  lastKnownMd0Server = buffer;
   return findTabletWithBox(b, layer, md0, justone);
 }
 

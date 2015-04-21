@@ -20,6 +20,7 @@ class TableStub {
   std::vector<TabletInfo> findTabletWithBox(const Box& b, int layer, bool justone);
   TabletServerService_Stub* getStub(const std::string& server);
   std::string table;
+  std::string lastKnownMd0Server;
 };
 
 #endif //_LIBCLIENT_H_
