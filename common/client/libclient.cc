@@ -106,25 +106,32 @@ std::vector<TabletInfo> tabletInfoFromStatus(Status::StatusValues status) {
 }
 
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bool justone) {
+  static hdfsFS fs=hdfsConnect("default",0);
   TabletInfo md0;
   md0.set_name("md0;;"+table);
-  if (lastKnownMd0Server.size()) {
-    md0.set_server(lastKnownMd0Server);
-    std::vector<TabletInfo> ret = findTabletWithBox(b, layer, md0, justone);
-    if (!ret.size() || ret[0].status().status() != Status::NoSuchTablet) {
-      return ret;
-    }
-  }
-  static hdfsFS fs=hdfsConnect("default",0);
-  hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
-  int bytesToRead = hdfsAvailable(fs, readFile);
   std::string buffer;
-  buffer.resize(bytesToRead);
-  tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
-  hdfsCloseFile(fs, readFile);
-  md0.set_server(buffer);
-  lastKnownMd0Server = buffer;
-  return findTabletWithBox(b, layer, md0, justone);
+  buffer=lastKnownMd0Server;
+  std::vector<int> retry_delays = {0, 1, 5, 1000, 5000, -1};
+  for (int retry_delay : retry_delays) {
+    if (buffer.size()) {
+      md0.set_server(buffer);
+      std::vector<TabletInfo> ret = findTabletWithBox(b, layer, md0, justone);
+      if (!ret.size() || ret[0].status().status() != Status::NoSuchTablet) {
+	return ret;
+      }
+    }
+    if (retry_delay==-1) {
+      return tabletInfoFromStatus(Status::NoSuchTablet);
+    }
+    std::cout << "No such tablet: sleeping " << retry_delay << "ms and retrying\n";
+    usleep(retry_delay*1000);
+    hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
+    int bytesToRead = hdfsAvailable(fs, readFile);
+    buffer.resize(bytesToRead);
+    tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
+    hdfsCloseFile(fs, readFile);
+    lastKnownMd0Server = buffer;
+  }
 }
 
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, TabletInfo in, bool justone) {
