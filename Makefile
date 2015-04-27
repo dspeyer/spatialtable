@@ -2,7 +2,7 @@ HADOOP_HOME = /usr/local/hadoop
 COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -DBOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL -Wall -Wno-unused-variable -Wno-unused-function -I$(HADOOP_HOME)/include
 LIBS = -lrpcz -lprotobuf -lboost_system -lboost_serialization -lhdfs -L$(HADOOP_HOME)/lib/native -L-L/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
 
-all: tabletserver stclient
+all: tabletserver stclient tabletbalancer
 
 # Common
 
@@ -40,6 +40,9 @@ bin/tabletserver.o: server/tabletserver.cc common/gen/tabletserver.pb.h common/g
 bin/tablet_test.o: server/tablet_test.cc common/gen/tabletserver.pb.h common/utils.h server/tablet.h
 	${COMPILE} -o bin/tablet_test.o server/tablet_test.cc
 
+bin/tabletbalancer.o: server/tabletbalancer.cc common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h common/utils.h server/tablet.h
+	${COMPILE} -o bin/tabletbalancer.o server/tabletbalancer.cc
+
 
 tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o bin/libclient.o
 	g++ -g -o tabletserver bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o bin/libclient.o ${LIBS}
@@ -47,7 +50,8 @@ tabletserver: bin/tabletserver.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o b
 tablet_test: bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o
 	g++ -g -o tablet_test bin/tablet_test.o bin/tabletserver.pb.o bin/tablet.o ${LIBS}
 
-
+tabletbalancer: bin/tabletbalancer.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o 
+	g++ -g -o tabletbalancer bin/tabletbalancer.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/tablet.o ${LIBS}
 # Test
 
 tests/insertCommands: tests/starbucks.csv
