@@ -43,48 +43,59 @@ for (int i=0; i < 4; i++){
         max = i;
 }
 
-int numRowsToMove = (serverTotalLoad[max] % serverTotalLoad[min])/2;
+cout << "Figured out which server has the max load, server " << max <<endl;
+int numRowsToMove; 
+if (serverTotalLoad[max] == 0) {
+     numRowsToMove = 0;
+} else {
+   numRowsToMove = (serverTotalLoad[max] % serverTotalLoad[min])/2;
+}
 int diff = 0;
 int minDiff = 0;
 int tabletToMove = 0;
-for(int i=0; i< tablets[max].results_size(); i++){
-        if( (diff = tablets[max].results(i).size() % numRowsToMove) >= 0){
-                if( diff < minDiff) {
-                        minDiff = diff;
-                        tabletToMove = i;
-                }
+cout << "tabletToMove is " << tabletToMove <<" and mindiff is " << minDiff << endl;
+
+if (numRowsToMove != 0) {
+
+
+
+        for(int i=0; i< tablets[max].results_size(); i++){
+                if( (diff = tablets[max].results(i).size() % numRowsToMove) >= 0){
+                        if( diff < minDiff) {
+                                minDiff = diff;
+                                tabletToMove = i;
+                        }
+                }       
         }
-}
 
+        cout << "tabletToMove is " << tabletToMove <<" and mindiff is " << minDiff << endl; 
 
-  TabletServerService_Stub stub(application.create_rpc_channel("tcp://"+server[max]));
-  UnLoadRequest request;
-  Status response;
-  request.set_tablet(tablets[max].results(tabletToMove).name());
-    try{
-          stub.UnLoadTablet(request, &response, 5000);
-          cout << Status::StatusValues_Name(response.status()) << endl;
-     } catch (rpcz::rpc_error &e) {
-        cout << "Error: " << e.what() << endl;;
-   }
+        TabletServerService_Stub stub(application.create_rpc_channel("tcp://"+server[max]));
+        UnLoadRequest request;
+        Status response;
+        request.set_tablet(tablets[max].results(tabletToMove).name());
+        try{
+                stub.UnLoadTablet(request, &response, 5000);
+                cout << Status::StatusValues_Name(response.status()) << endl;
+        } catch (rpcz::rpc_error &e) {
+                cout << "Error: " << e.what() << endl;;
+        }
 
- TabletServerService_Stub stub2(application.create_rpc_channel("tcp://"+server[min]));
- LoadRequest request2;
- Status response2;
- request2.set_tablet(tablets[max].results(tabletToMove).name());
- request2.set_dim(tablets[max].results(tabletToMove).dim());
- try {
-        stub2.LoadTablet(request2, &response2, 5000);
-        cout << Status::StatusValues_Name(response2.status()) << endl;
-     } catch (rpcz::rpc_error &e) {
-        cout << "Error: " << e.what() << endl;
-      }
+        TabletServerService_Stub stub2(application.create_rpc_channel("tcp://"+server[min]));
+        LoadRequest request2;
+        Status response2;
+        request2.set_tablet(tablets[max].results(tabletToMove).name());
+        request2.set_dim(tablets[max].results(tabletToMove).dim());
+        try {
+                stub2.LoadTablet(request2, &response2, 5000);
+                cout << Status::StatusValues_Name(response2.status()) << endl;
+        } catch (rpcz::rpc_error &e) {
+                cout << "Error: " << e.what() << endl;
+        }
+
+} else{
 sleep(5);
+      }
 } 
 }
-
-
-
-
-
 
