@@ -65,6 +65,14 @@ bin/timedqueries.o: tests/timedqueries.cc tests/insertCommands common/client/lib
 timedqueries: bin/timedqueries.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
 	g++ -g -o timedqueries bin/timedqueries.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o  ${LIBS}
 
+bin/testlib.o: tests/testlib.cc tests/testlib.h common/client/libclient.h common/gen/tabletserver.pb.h common/gen/tabletserver.rpcz.h
+	${COMPILE}  -o bin/testlib.o tests/testlib.cc	
+
+bin/randtest.o: tests/randtest.cc tests/testlib.h
+	${COMPILE}  -o bin/randtest.o tests/randtest.cc	`Magick++-config --cppflags`
+
+rand: bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
+	g++ -g -o rand bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS} `Magick++-config --libs`
 
 
 # Misc
