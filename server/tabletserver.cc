@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <mutex>
 #include <rpcz/rpcz.hpp>
 #include <boost/archive/archive_exception.hpp>
 #include "../common/gen/tabletserver.pb.h"
@@ -15,6 +16,8 @@ using namespace std;
 rpcz::application *application;
 
 std::map<string,tablet*> tablets;
+std::map<string,std::mutex> tabletlocks;
+std::mutex namelistlock;
 
 std::string my_hostport;
 
@@ -55,6 +58,7 @@ class TabletServerServiceImpl : public TabletServerService {
   }
 
   virtual void Insert(const InsertRequest& request, rpcz::reply<Status> reply) {
+    std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
     Status response;
     auto it = tablets.find(request.tablet());
     if (it==tablets.end()) {
@@ -78,9 +82,13 @@ class TabletServerServiceImpl : public TabletServerService {
 	if (status!=Status::Success) {
 	  std::cerr << "Failed to remove old " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
 	}
+	namelistlock.lock();
 	tablets.erase(it);
+	namelistlock.unlock();
 	for (unsigned int i=0; i<newt.size(); i++) {
+	  namelistlock.lock();
 	  tablets[newt[i]->get_name()] = newt[i];
+	  namelistlock.unlock();
 	  status = stub.Insert(newt[i]->get_borders(), tablet_description(newt[i]), newt[i]->get_layer()-1);
 	  if (status!=Status::Success) {
 	    std::cerr << "Failed to insert " << newt[i]->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
@@ -94,6 +102,7 @@ class TabletServerServiceImpl : public TabletServerService {
   }
   
   virtual void Remove(const RemoveRequest& request, rpcz::reply<Status> reply) {
+    std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
     Status response;
     auto it = tablets.find(request.tablet());
     if (it==tablets.end()) {
@@ -118,6 +127,7 @@ class TabletServerServiceImpl : public TabletServerService {
   }
 
   virtual void Query(const QueryRequest& request, rpcz::reply<QueryResponse> reply) {
+    std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
     QueryResponse response;
     auto it = tablets.find(request.tablet());
     if (it==tablets.end()) {
@@ -137,6 +147,7 @@ class TabletServerServiceImpl : public TabletServerService {
   }
 
   virtual void ListTablets(const ListRequest& request, rpcz::reply<ListResponse> reply) {
+    std::lock_guard<std::mutex> listguard(namelistlock);
     ListResponse response;
     for (auto i : tablets) {
       TabletDescription* t = response.add_results();
@@ -147,6 +158,8 @@ class TabletServerServiceImpl : public TabletServerService {
   }
 
   virtual void UnLoadTablet(const UnLoadRequest& request, rpcz::reply<Status> reply) {
+    std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
+    std::lock_guard<std::mutex> listguard(namelistlock);
     Status response;
     auto it = tablets.find(request.tablet());
     if (it==tablets.end()) {
@@ -168,6 +181,8 @@ class TabletServerServiceImpl : public TabletServerService {
   }
 
   virtual void LoadTablet(const LoadRequest& request, rpcz::reply<Status> reply) {
+    std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
+    std::lock_guard<std::mutex> listguard(namelistlock);
     Status response;
     tablet * t = tablet::New("",request.dim(),2);
     if (t==NULL) {
