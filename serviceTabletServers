@@ -6,7 +6,7 @@ IFS=$'\n'
 if [ -z "$1" ]
 then
  echo "usage: serviceTabletServers option inputFile"
- echo "where option: start or stop"
+ echo "where option: start,stop,status"
  exit 1
 fi
 
@@ -14,7 +14,7 @@ if [ $1 == "start" ]
 then 
         if [ -z $2 ]
         then
-                echo "please enter an inputFile"
+                echo "please enter an inputFile, maybe serverNodes.."
                 exit 1
         else
                 nodes="$2"
@@ -29,7 +29,7 @@ elif [ $1 == "stop" ]
 then
        if [ -z $2 ]
        then
-                echo "please enter an inputFile"
+                echo "please enter an inputFile, maybe serverNodes.."
                 exit 1
         else
                 nodes="$2"
@@ -45,7 +45,7 @@ elif [ $1 == "status" ]
 then
         if [ -z $2 ]
         then
-                echo "please enter an inputFile"
+                echo "please enter an inputFile, maybe serverNodes.."
                 exit 1
         else
                 nodes="$2"
