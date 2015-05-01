@@ -2,7 +2,7 @@ HADOOP_HOME = /usr/local/hadoop
 COMPILE = g++ -c -g --std=c++11  -I/usr/local/include/boost_1_57_0 -DBOOST_GEOMETRY_INDEX_DETAIL_EXPERIMENTAL -Wall -Wno-unused-variable -Wno-unused-function -I$(HADOOP_HOME)/include
 LIBS = -lrpcz -lprotobuf -lboost_system -lboost_serialization -lhdfs -L$(HADOOP_HOME)/lib/native -L-L/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
 
-all: tabletserver stclient tabletbalancer
+all: tabletserver stclient tabletbalancer randtest insertStarbucks timedqueries
 
 # Common
 
@@ -75,8 +75,8 @@ bin/testlib.o: tests/testlib.cc tests/testlib.h common/client/libclient.h common
 bin/randtest.o: tests/randtest.cc tests/testlib.h
 	${COMPILE}  -o bin/randtest.o tests/randtest.cc	`Magick++-config --cppflags`
 
-rand: bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
-	g++ -g -o rand bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS} `Magick++-config --libs`
+randtest: bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
+	g++ -g -o randtest bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS} `Magick++-config --libs`
 
 
 # Misc
