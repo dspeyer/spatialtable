@@ -125,11 +125,12 @@ std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bo
     }
     std::cout << "No such tablet: sleeping " << retry_delay << "ms and retrying\n";
     usleep(retry_delay*1000);
-    hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
+    /*    hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
     int bytesToRead = hdfsAvailable(fs, readFile);
     buffer.resize(bytesToRead);
     tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
-    hdfsCloseFile(fs, readFile);
+    hdfsCloseFile(fs, readFile);*/
+    buffer = "localhost:5555";
     lastKnownMd0Server = buffer;
   }
 }

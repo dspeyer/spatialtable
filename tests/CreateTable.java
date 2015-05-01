@@ -17,8 +17,15 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class CreateTable {
+
+    public static String filename;
      
     public static void main(String[] args) throws IOException{
+		if (args.length>0) {
+			    filename=args[0];
+		} else {
+			    filename="starbucks.csv";
+		}
 		//Instantiating configuration class
 		Configuration con = HBaseConfiguration.create();
 		//Instantiating HBaseAdmin class
@@ -43,14 +50,13 @@ public class CreateTable {
         //accepts a row name
        // Put p = new Put(Bytes.toBytes("row"));  
 
-    	String csvFile = "/home/hduser/peiran-scratch/starbucks.csv";
     	BufferedReader br = null;
     	String line = "";
     	String csvSplitBy = ",";
     	int count=0;
     	
     	try{
-    		br = new BufferedReader(new FileReader(csvFile));
+    		br = new BufferedReader(new FileReader(filename));
     		while ((line = br.readLine()) != null){
     			 //Instantiating configuration class
                          Configuration con = HBaseConfiguration.create();

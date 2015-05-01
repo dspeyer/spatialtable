@@ -79,6 +79,16 @@ randtest: bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin
 	g++ -g -o randtest bin/testlib.o bin/randtest.o bin/libclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS} `Magick++-config --libs`
 
 
+tests/CreateTable.class: tests/CreateTable.java
+	javac tests/CreateTable.java
+tests/MongoStore.class: tests/MongoStore.java
+	javac tests/MongoStore.java
+tests/Query.class: tests/Query.java
+	javac tests/Query.java
+tests/QueryFilter.class: tests/QueryFilter.java
+	javac tests/QueryFilter.java
+
+
 # Misc
 
 midterm.pdf: midterm.tex querytimes.png
