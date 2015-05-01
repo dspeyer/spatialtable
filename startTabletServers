@@ -1,0 +1,11 @@
+#!/bin/bash
+
+nodes="$1"
+IFS=$'\n'
+home=/home/hduser/slee-scratch/spatialtable
+for next in `cat $nodes`
+do
+    ssh $next "$home/tabletserver 5555 > $home/log/tabletServers.log 2>&1 &"
+    echo "started server on $next"
+done
+exit 0
