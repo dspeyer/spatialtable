@@ -21,34 +21,34 @@ public class CreateTable {
     public static String filename;
      
     public static void main(String[] args) throws IOException{
-		if (args.length>0) {
-			    filename=args[0];
-		} else {
-			    filename="starbucks.csv";
-		}
-		//Instantiating configuration class
-		Configuration con = HBaseConfiguration.create();
-		//Instantiating HBaseAdmin class
-		HBaseAdmin admin = new HBaseAdmin(con);
-	        //Instantiating table descriptor class
-	 	HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("Starbuck"));
-		//Adding column families to table descriptor
-		tableDescriptor.addFamily(new HColumnDescriptor("StoreInformation"));
-		CreateTable obj = new CreateTable();
-		obj.run();
-                //Execute the table through admin
-                admin.createTable(tableDescriptor);
-                System.out.println("Table created");
+	if (args.length>0) {
+	    filename=args[0];
+	} else {
+	    filename="starbucks.csv";
 	}
-	
+	//Instantiating configuration class
+	Configuration con = HBaseConfiguration.create();
+	//Instantiating HBaseAdmin class
+	HBaseAdmin admin = new HBaseAdmin(con);
+	//Instantiating table descriptor class
+	HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("Starbuck"));
+	//Adding column families to table descriptor
+	tableDescriptor.addFamily(new HColumnDescriptor("StoreInformation"));
+	CreateTable obj = new CreateTable();
+	obj.run();
+	//Execute the table through admin
+	admin.createTable(tableDescriptor);
+	System.out.println("Table created");
+    }
+    
     public void run() throws IOException{
-        //Instantiating configuration class
-       // Configuration con = HBaseConfiguration.create();
+	//Instantiating configuration class
+	// Configuration con = HBaseConfiguration.create();
         //Instantiating HTable class
-       // HTable hTable = new HTable(con,"Starbuck");
+	// HTable hTable = new HTable(con,"Starbuck");
         //Instantiating put class
         //accepts a row name
-       // Put p = new Put(Bytes.toBytes("row"));  
+	// Put p = new Put(Bytes.toBytes("row"));  
 
     	BufferedReader br = null;
     	String line = "";
@@ -56,44 +56,44 @@ public class CreateTable {
     	int count=0;
     	
     	try{
-    		br = new BufferedReader(new FileReader(filename));
-    		while ((line = br.readLine()) != null){
-    			 //Instantiating configuration class
-                         Configuration con = HBaseConfiguration.create();
-                         //Instantiating HTable class
-                         HTable hTable = new HTable(con,"Starbuck");
-                         //Instantiating put class
-                         //accepts a row name
-                         Put p = new Put(Bytes.toBytes(count));  
+	    br = new BufferedReader(new FileReader(filename));
+	    while ((line = br.readLine()) != null){
+		//Instantiating configuration class
+		Configuration con = HBaseConfiguration.create();
+		//Instantiating HTable class
+		HTable hTable = new HTable(con,"Starbuck");
+		//Instantiating put class
+		//accepts a row name
+		Put p = new Put(Bytes.toBytes(count));  
                  
-                        String[] row = line.split(csvSplitBy);
-                        String table[][] = {row};
-                        //adding values using add() method
-                        //accepts column family name, qualifier/row name, value
-                        p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("name"),Bytes.toBytes(table[0][0]));
-                        p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("latitude"),Bytes.toBytes(table[0][1]));
-                        p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("longitude"),Bytes.toBytes(table[0][2]));
-                        //Saving the put Instance to the HTable
-                        hTable.put(p);
+		String[] row = line.split(csvSplitBy);
+		String table[][] = {row};
+		//adding values using add() method
+		//accepts column family name, qualifier/row name, value
+		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("name"),Bytes.toBytes(table[0][0]));
+		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("latitude"),Bytes.toBytes(table[0][1]));
+		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("longitude"),Bytes.toBytes(table[0][2]));
+		//Saving the put Instance to the HTable
+		hTable.put(p);
         
-    	                System.out.println("name= "+ table[0][0]+",lat="+table[0][1]+",longi="+table[0][2]);
-    	                System.out.println(count);
-                        count++;
-                         //closing HTable
-                        hTable.close();	
-    		}
+		System.out.println("name= "+ table[0][0]+",lat="+table[0][1]+",longi="+table[0][2]);
+		System.out.println(count);
+		count++;
+		//closing HTable
+		hTable.close();	
+	    }
     	} catch(FileNotFoundException e){
-    		e.printStackTrace();
+	    e.printStackTrace();
     	}catch(IOException e){
-    		e.printStackTrace();
+	    e.printStackTrace();
     	}finally{
-    		if(br != null){
-    			try{
-    				br.close();
-    			}catch(IOException e){
-    				e.printStackTrace();
-    			}
-    		}
+	    if(br != null){
+		try{
+		    br.close();
+		}catch(IOException e){
+		    e.printStackTrace();
+		}
+	    }
     	}
     	System.out.println("Done");
     }
