@@ -1,0 +1,59 @@
+#!/bin/bash
+
+home=/home/hduser/slee-scratch/spatialtable
+IFS=$'\n'
+
+if [ -z "$1" ]
+then
+ echo "usage: serviceTabletServers option inputFile"
+ echo "where option: start,stop,status"
+ exit 1
+fi
+
+if [ $1 == "start" ]
+then 
+        if [ -z $2 ]
+        then
+                echo "please enter an inputFile, maybe serverNodes.."
+                exit 1
+        else
+                nodes="$2"
+                for next in `cat $nodes`
+                do
+                ssh $next "$home/tabletserver 5555 > $home/log/tabletServers.log 2>&1 &"
+                echo "started server on $next"
+                done
+                exit 0
+        fi
+elif [ $1 == "stop" ]
+then
+       if [ -z $2 ]
+       then
+                echo "please enter an inputFile, maybe serverNodes.."
+                exit 1
+        else
+                nodes="$2"
+                for next in `cat $nodes`
+                do
+                kill=$(ssh $next "ps -ef |grep tabletserver | awk '{print \$2;exit;}'")
+                ssh $next "kill -9 $kill"
+                echo "killed server on $next"
+                done
+                exit 0
+        fi
+elif [ $1 == "status" ]
+then
+        if [ -z $2 ]
+        then
+                echo "please enter an inputFile, maybe serverNodes.."
+                exit 1
+        else
+                nodes="$2"
+                for next in `cat $nodes`
+                do
+                echo "status on server: $next"
+                ssh $next "ps -ef |grep tabletserver |awk '{print ;exit;}'"
+                done
+                exit 0
+        fi
+fi
