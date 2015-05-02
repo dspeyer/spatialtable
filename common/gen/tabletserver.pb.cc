@@ -246,9 +246,10 @@ void protobuf_AssignDesc_tabletserver_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ListRequest));
   TabletDescription_descriptor_ = file->message_type(11);
-  static const int TabletDescription_offsets_[2] = {
+  static const int TabletDescription_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletDescription, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletDescription, dim_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TabletDescription, size_),
   };
   TabletDescription_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -394,19 +395,20 @@ void protobuf_AddDesc_tabletserver_2eproto() {
     "let\030\001 \002(\t\022\023\n\005query\030\002 \002(\0132\004.Box\022\021\n\tis_wit"
     "hin\030\003 \002(\010\"\?\n\rQueryResponse\022\027\n\006status\030\001 \002"
     "(\0132\007.Status\022\025\n\007results\030\002 \003(\0132\004.Row\"\r\n\013Li"
-    "stRequest\".\n\021TabletDescription\022\014\n\004name\030\001"
-    " \002(\t\022\013\n\003dim\030\002 \002(\005\"3\n\014ListResponse\022#\n\007res"
-    "ults\030\001 \003(\0132\022.TabletDescription\"u\n\nTablet"
-    "Info\022\016\n\006server\030\001 \002(\t\022\014\n\004name\030\002 \002(\t\022\027\n\017mu"
-    "st_cross_dims\030\003 \003(\005\022\027\n\017must_cross_vals\030\004"
-    " \003(\001\022\027\n\006status\030\005 \001(\0132\007.Status2\235\002\n\023Tablet"
-    "ServerService\022\036\n\013CreateTable\022\006.Table\032\007.S"
-    "tatus\022!\n\006Insert\022\016.InsertRequest\032\007.Status"
-    "\022!\n\006Remove\022\016.RemoveRequest\032\007.Status\022&\n\005Q"
-    "uery\022\r.QueryRequest\032\016.QueryResponse\022*\n\013L"
-    "istTablets\022\014.ListRequest\032\r.ListResponse\022"
-    "#\n\nLoadTablet\022\014.LoadRequest\032\007.Status\022\'\n\014"
-    "UnLoadTablet\022\016.UnLoadRequest\032\007.Status", 1197);
+    "stRequest\"<\n\021TabletDescription\022\014\n\004name\030\001"
+    " \002(\t\022\013\n\003dim\030\002 \002(\005\022\014\n\004size\030\003 \002(\005\"3\n\014ListR"
+    "esponse\022#\n\007results\030\001 \003(\0132\022.TabletDescrip"
+    "tion\"u\n\nTabletInfo\022\016\n\006server\030\001 \002(\t\022\014\n\004na"
+    "me\030\002 \002(\t\022\027\n\017must_cross_dims\030\003 \003(\005\022\027\n\017mus"
+    "t_cross_vals\030\004 \003(\001\022\027\n\006status\030\005 \001(\0132\007.Sta"
+    "tus2\235\002\n\023TabletServerService\022\036\n\013CreateTab"
+    "le\022\006.Table\032\007.Status\022!\n\006Insert\022\016.InsertRe"
+    "quest\032\007.Status\022!\n\006Remove\022\016.RemoveRequest"
+    "\032\007.Status\022&\n\005Query\022\r.QueryRequest\032\016.Quer"
+    "yResponse\022*\n\013ListTablets\022\014.ListRequest\032\r"
+    ".ListResponse\022#\n\nLoadTablet\022\014.LoadReques"
+    "t\032\007.Status\022\'\n\014UnLoadTablet\022\016.UnLoadReque"
+    "st\032\007.Status", 1211);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "tabletserver.proto", &protobuf_RegisterTypes);
   Box::default_instance_ = new Box();
@@ -3245,6 +3247,7 @@ void ListRequest::Swap(ListRequest* other) {
 #ifndef _MSC_VER
 const int TabletDescription::kNameFieldNumber;
 const int TabletDescription::kDimFieldNumber;
+const int TabletDescription::kSizeFieldNumber;
 #endif  // !_MSC_VER
 
 TabletDescription::TabletDescription()
@@ -3265,6 +3268,7 @@ void TabletDescription::SharedCtor() {
   _cached_size_ = 0;
   name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   dim_ = 0;
+  size_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -3309,6 +3313,7 @@ void TabletDescription::Clear() {
       }
     }
     dim_ = 0;
+    size_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -3348,6 +3353,22 @@ bool TabletDescription::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(24)) goto parse_size;
+        break;
+      }
+
+      // required int32 size = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_size:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &size_)));
+          set_has_size();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3384,6 +3405,11 @@ void TabletDescription::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->dim(), output);
   }
 
+  // required int32 size = 3;
+  if (has_size()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->size(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3405,6 +3431,11 @@ void TabletDescription::SerializeWithCachedSizes(
   // required int32 dim = 2;
   if (has_dim()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->dim(), target);
+  }
+
+  // required int32 size = 3;
+  if (has_size()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->size(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3430,6 +3461,13 @@ int TabletDescription::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->dim());
+    }
+
+    // required int32 size = 3;
+    if (has_size()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->size());
     }
 
   }
@@ -3465,6 +3503,9 @@ void TabletDescription::MergeFrom(const TabletDescription& from) {
     if (from.has_dim()) {
       set_dim(from.dim());
     }
+    if (from.has_size()) {
+      set_size(from.size());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3482,7 +3523,7 @@ void TabletDescription::CopyFrom(const TabletDescription& from) {
 }
 
 bool TabletDescription::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
 
   return true;
 }
@@ -3491,6 +3532,7 @@ void TabletDescription::Swap(TabletDescription* other) {
   if (other != this) {
     std::swap(name_, other->name_);
     std::swap(dim_, other->dim_);
+    std::swap(size_, other->size_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

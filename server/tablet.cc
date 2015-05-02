@@ -18,7 +18,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/type_traits.hpp>
-#include "hdfs.h"  // for hdfs access
+#include "../common/wraphdfs.h"  // for hdfs access
 #include <cmath>
 
 struct alwaysTrue{
@@ -210,21 +210,8 @@ class tabletImpl : public tablet{
   std::string tn = this->get_name();
   tn = "/tablets/" + tn;
   const char *tName = tn.c_str();
-  // connect to hdfs
-  hdfsFS fs = hdfsConnect("default", 0); //default hdfs instance
-  //char writePath[100] = "/tablets/test1";
-  //const char *tabletDefPath = "/tablets/";
-  //strcpy(writePath, tabletDefPath);
-  //strcpy(writePath, tName);
   printf("writePath = %s\n",tName);
-  hdfsFile writeFile = hdfsOpenFile(fs, tName, O_WRONLY|O_CREAT, 0, 0, 0);
-  
-  if(!writeFile){
-    fprintf(stderr, "Failed to open %s for writing\n", tName);
-    exit(-1);
-  }
-  // create the archive file
-  //std::ofstream ofs("test3"); //name of tablet
+  HdfsFile writeFile(tName, HdfsFile::WRITE);
   std::ostringstream sfs;
   boost::archive::binary_oarchive oa(sfs);
   int dim=DIM; // I blame boost::archive
@@ -238,60 +225,19 @@ class tabletImpl : public tablet{
   std::vector<value> v;
   rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
   oa << v;
-  //ofs.close(); 
-  /*const char* archiveFile = "test3";
-   FILE *fp;
-   fp = fopen(archiveFile, "r"); 
-   if(fp == NULL){
-      printf("Failed to open archive file\n");
-   }
-   fseek(fp, 0, SEEK_END);
-   long fsize = ftell(fp);
-   printf("file size = %d",(int)fsize);
-   fseek(fp, 0, SEEK_SET);
-   char *buffer = (char*)malloc(fsize+1);
-   fread(buffer, fsize, 1, fp);
-   fclose(fp);
-  buffer[fsize] = 0;
-  printf("about to write = %s to HDFS\n",buffer);*/
-
-  //sfs.str().c_str(); 
-  tSize num_bytes = hdfsWrite(fs, writeFile, (void*)sfs.str().c_str(), sfs.str().length());
-  if(hdfsFlush(fs, writeFile)){
-       fprintf(stderr, "Failed to 'flush' %s\n", tName);
-        exit(-1);
-  } 
-  
-  printf("num of bytes written to hdfs = %d\n", num_bytes); 
-  hdfsCloseFile(fs, writeFile);
- 
+  writeFile.write(sfs.str());
  }
 
 virtual Status::StatusValues load(const std::string& file){
   //TODO:  load tablet name file from args
-  hdfsFS fs=hdfsConnect("default",0);
   std::string rp = "/tablets/" +file;
-  const char *readPath = rp.c_str();      
-  //char readPath[100] = "/tablets/test1";
-  int exists = hdfsExists(fs, readPath);
-  if (exists){
+  if (!HdfsFile::exists(rp)) {
     return Status::NoSuchFile;
   }
   
-  hdfsFile readFile = hdfsOpenFile(fs, readPath, O_RDONLY, 0, 0, 0);
- 
-  if(!readFile){
-    return Status::HfsReadError;
-   }
-  
-  int bytesToRead = hdfsAvailable(fs, readFile);
-  std::string buffer;
-  buffer.resize(bytesToRead);
-  tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
-  
-  //  std::cout << "reading " << bytesToRead << " bytes from '" << buffer << "'\n";
-
-  std::cout << "read data...\n";
+  HdfsFile readFile(rp, HdfsFile::READ);
+   
+  std::string buffer = readFile.read();
 
   std::istringstream ifs(buffer);
   boost::archive::binary_iarchive ia(ifs);
@@ -319,8 +265,6 @@ virtual Status::StatusValues load(const std::string& file){
   for(int i = 0; i < v.size(); i++){
 	rtree.insert(v[i]);
    }
-  hdfsCloseFile(fs, readFile);
-  std::cout << "done loading\n";
 
   return Status::Success;
 }

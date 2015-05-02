@@ -5,7 +5,7 @@
 #include "../gen/tabletserver.rpcz.h"
 #include "../utils.h"
 #include <iostream>
-#include "hdfs.h"
+#include "../wraphdfs.h"
 
 static rpcz::application* application;
 static std::map<std::string, TabletServerService_Stub*> cache;
@@ -106,33 +106,27 @@ std::vector<TabletInfo> tabletInfoFromStatus(Status::StatusValues status) {
 }
 
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bool justone) {
-  static hdfsFS fs=hdfsConnect("default",0);
   TabletInfo md0;
   md0.set_name("md0;;"+table);
-  std::string buffer;
-  buffer=lastKnownMd0Server;
   std::vector<int> retry_delays = {0, 1, 5, 1000, 5000, -1};
   for (int retry_delay : retry_delays) {
-    if (buffer.size()) {
-      md0.set_server(buffer);
+    if (lastKnownMd0Server.size()) {
+      md0.set_server(lastKnownMd0Server);
       std::vector<TabletInfo> ret = findTabletWithBox(b, layer, md0, justone);
       if (!ret.size() || ret[0].status().status() != Status::NoSuchTablet) {
 	return ret;
       }
+      std::cout << "No such tablet: sleeping " << retry_delay << "ms and retrying\n";
     }
     if (retry_delay==-1) {
       return tabletInfoFromStatus(Status::NoSuchTablet);
     }
-    std::cout << "No such tablet: sleeping " << retry_delay << "ms and retrying\n";
     usleep(retry_delay*1000);
-    /*    hdfsFile readFile = hdfsOpenFile(fs, ("/md0/"+table).c_str(), O_RDONLY, 0, 0, 0);
-    int bytesToRead = hdfsAvailable(fs, readFile);
-    buffer.resize(bytesToRead);
-    tSize num_read_bytes = hdfsRead(fs, readFile, (void*)buffer.c_str(), bytesToRead);
-    hdfsCloseFile(fs, readFile);*/
-    buffer = "localhost:5555";
-    lastKnownMd0Server = buffer;
+    HdfsFile readFile("/md0/"+table, HdfsFile::READ);
+    lastKnownMd0Server = readFile.read();
+    std::cout << "Now looking for md0 on " << lastKnownMd0Server << std::endl;
   }
+  return tabletInfoFromStatus(Status::NoSuchTablet);
 }
 
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, TabletInfo in, bool justone) {
@@ -150,6 +144,7 @@ std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, Ta
       return tabletInfoFromStatus(Status::ServerDown);
     }
     if (response.status().status() != Status::Success) {
+      std::cerr << "got Status " << Status::StatusValues_Name(response.status().status()) << " from " << in.server() << " for " << in.name() << std::endl;
       return tabletInfoFromStatus(response.status().status());
     }
     bool found=false;

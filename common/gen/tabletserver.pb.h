@@ -1215,20 +1215,30 @@ class TabletDescription : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 dim() const;
   inline void set_dim(::google::protobuf::int32 value);
 
+  // required int32 size = 3;
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 3;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:TabletDescription)
  private:
   inline void set_has_name();
   inline void clear_has_name();
   inline void set_has_dim();
   inline void clear_has_dim();
+  inline void set_has_size();
+  inline void clear_has_size();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* name_;
   ::google::protobuf::int32 dim_;
+  ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_tabletserver_2eproto();
   friend void protobuf_AssignDesc_tabletserver_2eproto();
@@ -2447,6 +2457,28 @@ inline ::google::protobuf::int32 TabletDescription::dim() const {
 inline void TabletDescription::set_dim(::google::protobuf::int32 value) {
   set_has_dim();
   dim_ = value;
+}
+
+// required int32 size = 3;
+inline bool TabletDescription::has_size() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TabletDescription::set_has_size() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TabletDescription::clear_has_size() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TabletDescription::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 TabletDescription::size() const {
+  return size_;
+}
+inline void TabletDescription::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
 }
 
 // -------------------------------------------------------------------

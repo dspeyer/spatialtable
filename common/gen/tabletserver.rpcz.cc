@@ -58,19 +58,20 @@ void rpcz_protobuf_AddDesc_tabletserver_2eproto() {
     "let\030\001 \002(\t\022\023\n\005query\030\002 \002(\0132\004.Box\022\021\n\tis_wit"
     "hin\030\003 \002(\010\"\?\n\rQueryResponse\022\027\n\006status\030\001 \002"
     "(\0132\007.Status\022\025\n\007results\030\002 \003(\0132\004.Row\"\r\n\013Li"
-    "stRequest\".\n\021TabletDescription\022\014\n\004name\030\001"
-    " \002(\t\022\013\n\003dim\030\002 \002(\005\"3\n\014ListResponse\022#\n\007res"
-    "ults\030\001 \003(\0132\022.TabletDescription\"u\n\nTablet"
-    "Info\022\016\n\006server\030\001 \002(\t\022\014\n\004name\030\002 \002(\t\022\027\n\017mu"
-    "st_cross_dims\030\003 \003(\005\022\027\n\017must_cross_vals\030\004"
-    " \003(\001\022\027\n\006status\030\005 \001(\0132\007.Status2\235\002\n\023Tablet"
-    "ServerService\022\036\n\013CreateTable\022\006.Table\032\007.S"
-    "tatus\022!\n\006Insert\022\016.InsertRequest\032\007.Status"
-    "\022!\n\006Remove\022\016.RemoveRequest\032\007.Status\022&\n\005Q"
-    "uery\022\r.QueryRequest\032\016.QueryResponse\022*\n\013L"
-    "istTablets\022\014.ListRequest\032\r.ListResponse\022"
-    "#\n\nLoadTablet\022\014.LoadRequest\032\007.Status\022\'\n\014"
-    "UnLoadTablet\022\016.UnLoadRequest\032\007.Status", 1197);
+    "stRequest\"<\n\021TabletDescription\022\014\n\004name\030\001"
+    " \002(\t\022\013\n\003dim\030\002 \002(\005\022\014\n\004size\030\003 \002(\005\"3\n\014ListR"
+    "esponse\022#\n\007results\030\001 \003(\0132\022.TabletDescrip"
+    "tion\"u\n\nTabletInfo\022\016\n\006server\030\001 \002(\t\022\014\n\004na"
+    "me\030\002 \002(\t\022\027\n\017must_cross_dims\030\003 \003(\005\022\027\n\017mus"
+    "t_cross_vals\030\004 \003(\001\022\027\n\006status\030\005 \001(\0132\007.Sta"
+    "tus2\235\002\n\023TabletServerService\022\036\n\013CreateTab"
+    "le\022\006.Table\032\007.Status\022!\n\006Insert\022\016.InsertRe"
+    "quest\032\007.Status\022!\n\006Remove\022\016.RemoveRequest"
+    "\032\007.Status\022&\n\005Query\022\r.QueryRequest\032\016.Quer"
+    "yResponse\022*\n\013ListTablets\022\014.ListRequest\032\r"
+    ".ListResponse\022#\n\nLoadTablet\022\014.LoadReques"
+    "t\032\007.Status\022\'\n\014UnLoadTablet\022\016.UnLoadReque"
+    "st\032\007.Status", 1211);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "tabletserver.proto", &protobuf_RegisterTypes);
   ::google::protobuf::internal::OnShutdown(&rpcz_protobuf_ShutdownFile_tabletserver_2eproto);

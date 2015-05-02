@@ -9,7 +9,7 @@
 #include "../common/utils.h"
 #include "../common/client/libclient.h"
 #include "tablet.h"
-#include "hdfs.h"  // for hdfs access
+#include "../common/wraphdfs.h"  // for hdfs access
 
 using namespace std;
 
@@ -48,11 +48,8 @@ class TabletServerServiceImpl : public TabletServerService {
     tablets[md0->get_name()]=md0;
     meta->insert(content->get_borders(), tablet_description(content));
     md0->insert(meta->get_borders(), tablet_description(meta));
-    hdfsFS fs = hdfsConnect("default", 0);
-    hdfsFile writeFile = hdfsOpenFile(fs, ("/md0/"+content->get_table()).c_str(), O_WRONLY|O_CREAT, 0, 0, 0);
-    hdfsWrite(fs, writeFile, (void*)my_hostport.c_str(), my_hostport.length());
-    hdfsFlush(fs, writeFile);
-    hdfsCloseFile(fs, writeFile);
+    HdfsFile writeFile("/md0/"+content->get_table(), HdfsFile::WRITE);
+    writeFile.write(my_hostport);
     response.set_status(Status::Success);
     reply.send(response);
   }
@@ -83,7 +80,12 @@ class TabletServerServiceImpl : public TabletServerService {
 	  std::cerr << "Failed to remove old " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
 	}
 	namelistlock.lock();
-	tablets.erase(it);
+	it = tablets.find(request.tablet());
+	if (it!=tablets.end()) {
+	  tablets.erase(it);
+	} else {
+	  std::cerr << "Tablet " << request.tablet() << " already gone!\n";
+	}
 	namelistlock.unlock();
 	for (unsigned int i=0; i<newt.size(); i++) {
 	  namelistlock.lock();
@@ -152,7 +154,8 @@ class TabletServerServiceImpl : public TabletServerService {
     for (auto i : tablets) {
       TabletDescription* t = response.add_results();
       t->set_name(i.second->get_name());
-      t->set_dim(i.second->get_dim());      
+      t->set_dim(i.second->get_dim());
+      t->set_size(i.second->get_size());
     }
     reply.send(response);
   }
@@ -215,11 +218,8 @@ class TabletServerServiceImpl : public TabletServerService {
 	std::cerr << "Failed to insert " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
       }
     } else {
-      hdfsFS fs = hdfsConnect("default", 0);
-      hdfsFile writeFile = hdfsOpenFile(fs, ("/md0/"+t->get_table()).c_str(), O_WRONLY|O_CREAT, 0, 0, 0);
-      hdfsWrite(fs, writeFile, (void*)my_hostport.c_str(), my_hostport.length());
-      hdfsFlush(fs, writeFile);
-      hdfsCloseFile(fs, writeFile);
+      HdfsFile writeFile("/md0/"+t->get_table(), HdfsFile::WRITE);
+      writeFile.write(my_hostport);
     }
     std::cout << "done loading rpc\n";
     response.set_status(Status::Success);

@@ -2,6 +2,7 @@
 #include "../common/gen/tabletserver.rpcz.h"
 #include <rpcz/rpcz.hpp>
 #include <iostream>
+#include <fstream>
 #include "testlib.h"
 
 class stdoutStub : public dbStub {
@@ -21,6 +22,30 @@ class stdoutStub : public dbStub {
     return 0;
   } 
 };
+
+class javaStub : public dbStub {
+public:
+  javaStub() : insF("rand.csv"), qF("randquery.csv") {}
+  virtual void insert(const std::vector<double>& v) {
+    insF << "x";
+    for (double d : v) {
+      insF << "," << d;
+    }
+    insF << std::endl;
+  }
+  virtual int query(const std::vector<double>& start, const std::vector<double>& end) {
+    for (unsigned int i=0; i<start.size(); i++) {
+      qF << start[i] << "," << end[i];
+      if (i != start.size()-1) {
+	qF << ",";
+      }
+    }
+    qF << std::endl;
+    return 0;
+  } 
+  std::ofstream insF, qF;
+};
+
 
 class spatialStub : public dbStub {
 public:
@@ -54,6 +79,8 @@ public:
     return new stdoutStub();
   } else if (type=="spatialtable") {
     return  new spatialStub();
+  } else if (type=="java") {
+    return  new javaStub();
   } else {
     std::cout << "Unrecognized database: " << type << std::endl;
     exit(1);

@@ -63,6 +63,7 @@ message ListRequest {}
 message TabletDescription {
   required string name = 1;
   required int32 dim = 2;
+  required int32 size = 3;
 }
 
 message ListResponse {

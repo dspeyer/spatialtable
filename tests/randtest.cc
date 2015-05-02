@@ -40,7 +40,7 @@ public:
 	}
       }
     }
-    char image[imgSize][imgSize][3];
+    auto image = new char[imgSize][imgSize][3];
     for (int x=0; x<imgSize; x++) {
       for (int y=0; y<imgSize; y++) {
 	double v = ((double)cnt[x][y])/maxcnt;
@@ -65,9 +65,11 @@ public:
 	}
       }
     }
-    Blob blob(image, sizeof(image));
+
+    Blob blob(image, imgSize*imgSize*3);
     Image img(imgSize, imgSize, "RGB", CharPixel, image);
     img.write("map.png");
+    delete image;
   }
 };
 
@@ -129,12 +131,17 @@ int main(int argc, char** argv) {
   int q=atoi(argv[4]);    
   Randomizer r(dim, nmodes);
   HeatMap *hm = NULL;
-  dbStub *db = dbStub::New(argv[5]);
-  
+    
   if (dim==2 && !std::strcmp(argv[6],"yes")) {
     hm = new HeatMap();
+    hm->write();
   }
 
+  dbStub *db = dbStub::New(argv[5]);
+
+  if (hm) {
+    hm->write();
+  }
   // Insertions
   
   for (int i=0; i<n; i++) {
@@ -154,14 +161,13 @@ int main(int argc, char** argv) {
     hm->write();
     delete hm;
   }
-  
+
   // Queries
 
   std::uniform_real_distribution<double> qd(500,2000);
   for (int i=0; i<q; i++) {
     std::vector<double> pt = r.get();
     double p = r.p(pt);
-    std::cout << "p=" << p << std::endl;
     double volume = (qd(gen)/n) / p;
     double side = pow(volume, 1.0/dim);
     if (side>0.2) {
@@ -176,6 +182,6 @@ int main(int argc, char** argv) {
     long long start = get_usec();
     int found = db->query(pt,pt2);
     long long end = get_usec();
-    std::cout << volume << ", " << found << ", " << (end-start)/1e6 << std::endl;
+    std::cout << volume << ", " << found << ", " << (end-start)/1e3 << std::endl;
   }
 }
