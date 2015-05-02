@@ -16,7 +16,7 @@ void list_tablets(TabletServerService_Stub* stub, int argc, char** argv) {
     stub->ListTablets(request, &response, 1000);
     cout << "Tablets loaded are:\n";
     for (int i=0; i<response.results_size(); i++) {
-      cout << "  '" << response.results(i).name() << "' (" << response.results(i).dim() << " dimensional)\n";
+      cout << "  '" << response.results(i).name() << "' (" << response.results(i).dim() << " dimensional) with " << response.results(i).size() << " rows\n";
     }
   } catch (rpcz::rpc_error &e) {
     cout << "Error: " << e.what() << endl;;
