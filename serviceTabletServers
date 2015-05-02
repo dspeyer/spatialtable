@@ -1,6 +1,6 @@
 #!/bin/bash
 
-home=/home/hduser/slee-scratch/spatialtable
+home=/home/hduser/dspeyer-scratch/spatialtable
 IFS=$'\n'
 
 if [ -z "$1" ]
@@ -17,10 +17,14 @@ then
                 echo "please enter an inputFile, maybe serverNodes.."
                 exit 1
         else
+	        D=`date | tr -c a-zA-Z0-9 _`
+		mkdir log/old/before_$D
+		mv log/*.out log/*.err log/old/before_$D
+
                 nodes="$2"
                 for next in `cat $nodes`
                 do
-                ssh $next "$home/tabletserver 5555 > $home/log/tabletServers.log 2>&1 &"
+                ssh $next "$home/start_tablet_server.sh"
                 echo "started server on $next"
                 done
                 exit 0

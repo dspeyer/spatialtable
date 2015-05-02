@@ -231,13 +231,15 @@ class tabletImpl : public tablet{
 virtual Status::StatusValues load(const std::string& file){
   //TODO:  load tablet name file from args
   std::string rp = "/tablets/" +file;
-  if (!HdfsFile::exists(rp)) {
-    return Status::NoSuchFile;
-  }
   
   HdfsFile readFile(rp, HdfsFile::READ);
    
   std::string buffer = readFile.read();
+
+  if (!buffer.size()) {
+    std::cerr << "hdfs file '" << rp << "' does not exist!\n";
+    return Status::NoSuchFile;
+  }
 
   std::istringstream ifs(buffer);
   boost::archive::binary_iarchive ia(ifs);

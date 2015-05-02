@@ -132,6 +132,7 @@ std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, bo
 std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, TabletInfo in, bool justone) {
   //  std::cerr << "looking for " << stringFromBox(b) << "  in " << in.name() << std::endl;
   if (layer>0) {
+    //    std::cerr << "getting stub for '" << in.server() << "'" << std::endl << std::flush;
     TabletServerService_Stub* stub=getStub(in.server());
     QueryRequest request;
     QueryResponse response;
@@ -173,22 +174,23 @@ std::vector<TabletInfo> TableStub::findTabletWithBox(const Box& b, int layer, Ta
     bool failsCrossing=false;
     //    std::cerr << "contemplating " << in.name() << " as a place to find " << stringFromBox(b) << std::endl;
     if (justone) {
+      //      std::cerr << "contemplating " << in.must_cross_dims_size() << " crosses " << std::endl;
       for (int i=0; i<in.must_cross_dims_size(); i++) {
         int dim = in.must_cross_dims(i);
         double val = in.must_cross_vals(i);
         if (b.end(dim)<=val || b.start(dim)>=val) {
-	  //	std::cerr << "...fails to cross " << dim << "=" << val << std::endl;
 	  failsCrossing=true;
 	  break;
         }
       }
     }
     if (!failsCrossing) {
-      //      std::cerr << "...crosses\n";
       in.mutable_status()->set_status(Status::Success);
       std::vector<TabletInfo> out = {in};
+      //      std::cerr << "return out\n";
       return out;
     } else {
+      //      std::cerr << "return CFNT\n";
       return tabletInfoFromStatus(Status::CouldNotFindTablet);
     }
   }
