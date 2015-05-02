@@ -19,6 +19,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 public class CreateTable {
 
     public static String filename;
+    public static String tablename;
      
     public static void main(String[] args) throws IOException{
 	if (args.length>0) {
@@ -26,18 +27,22 @@ public class CreateTable {
 	} else {
 	    filename="starbucks.csv";
 	}
+	String[] pieces=filename.split("\\.");
+	System.out.println("filename="+filename);
+	System.out.println("pieces.length="+pieces.length);
+	tablename=pieces[0];
 	//Instantiating configuration class
 	Configuration con = HBaseConfiguration.create();
 	//Instantiating HBaseAdmin class
 	HBaseAdmin admin = new HBaseAdmin(con);
 	//Instantiating table descriptor class
-	HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("Starbuck"));
+	HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tablename));
 	//Adding column families to table descriptor
 	tableDescriptor.addFamily(new HColumnDescriptor("StoreInformation"));
+	admin.createTable(tableDescriptor);
 	CreateTable obj = new CreateTable();
 	obj.run();
 	//Execute the table through admin
-	admin.createTable(tableDescriptor);
 	System.out.println("Table created");
     }
     
@@ -45,7 +50,7 @@ public class CreateTable {
 	//Instantiating configuration class
 	// Configuration con = HBaseConfiguration.create();
         //Instantiating HTable class
-	// HTable hTable = new HTable(con,"Starbuck");
+	// HTable hTable = new HTable(con,tablename);
         //Instantiating put class
         //accepts a row name
 	// Put p = new Put(Bytes.toBytes("row"));  
@@ -61,24 +66,25 @@ public class CreateTable {
 		//Instantiating configuration class
 		Configuration con = HBaseConfiguration.create();
 		//Instantiating HTable class
-		HTable hTable = new HTable(con,"Starbuck");
+		HTable hTable = new HTable(con,tablename);
 		//Instantiating put class
 		//accepts a row name
 		Put p = new Put(Bytes.toBytes(count));  
                  
 		String[] row = line.split(csvSplitBy);
-		String table[][] = {row};
 		//adding values using add() method
 		//accepts column family name, qualifier/row name, value
-		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("name"),Bytes.toBytes(table[0][0]));
-		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("latitude"),Bytes.toBytes(table[0][1]));
-		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("longitude"),Bytes.toBytes(table[0][2]));
+		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("name"),Bytes.toBytes(row[0]));
+		for (int i=1; i<row.length; i++) {
+		    p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("dim"+i),Bytes.toBytes(Double.parseDouble(row[1])));
+		}
 		//Saving the put Instance to the HTable
 		hTable.put(p);
         
-		System.out.println("name= "+ table[0][0]+",lat="+table[0][1]+",longi="+table[0][2]);
-		System.out.println(count);
 		count++;
+		if (count%100 == 0) {
+		    System.out.println("inserted "+count);
+		}
 		//closing HTable
 		hTable.close();	
 	    }

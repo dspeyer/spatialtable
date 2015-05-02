@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 public class MongoStore{
         public static void main( String args[] ){
-            String csvFile = "/home/hduser/peiran-scratch/starbucks.csv";
             BufferedReader br = null;
             String line = "";
             String csvSplitBy = ",";
@@ -35,22 +34,22 @@ public class MongoStore{
                 System.out.println("Collection mycoll selected successfully"); 
                 
             
-                br = new BufferedReader(new FileReader(csvFile));
+                br = new BufferedReader(new FileReader(args[0]));
                 while ((line = br.readLine()) != null){
-                         String[] row = line.split(csvSplitBy);
-                         String table[][] = {row};
-                         
-
-                         BasicDBObject doc = new BasicDBObject("name", (table[0][0])).
-                                    append("latitude", Double.parseDouble(table[0][1])).
-                                    append("longitude", Double.parseDouble(table[0][2]));
+		    String[] row = line.split(csvSplitBy);
+		    
+		    BasicDBObject doc = new BasicDBObject("name", (row[0]));
+		    for (int i=1; i<row.length; i++) {
+			doc.append("dim"+i, Double.parseDouble(row[i]));
+		    }
                                     
-                        coll.insert(doc);
-                        System.out.println("Document inserted successfully");
-                        System.out.println("name= "+ table[0][0]+",lat="+table[0][1]+",longi="+table[0][2]);
-                        System.out.println(count);
-                        count++;
-                     }
+		    coll.insert(doc);
+		    count++;
+		    if (count % 1000 == 0) {
+			System.out.println("inserted "+count);
+		    }
+
+		}
                 
             }catch(Exception e){
                 System.err.println( e.getClass().getName() + ": " + e.getMessage() );
