@@ -133,37 +133,34 @@ class tabletImpl : public tablet{
       if (width>widest) {
 	bestdim=i;
 	widest=width;
-	cut=(getFromPoint(bound.max_corner(),i)+getFromPoint(bound.min_corner(),i))/2;
       }
     }
     if (bestdim==-1) return {};
     std::vector<value> v;
     rtree.query(boost::geometry::index::satisfies(alwaysTrue()), std::back_inserter(v));
-    if (!std::isfinite(cut)) {
-      std::vector<double> vals;
-      vals.reserve(v.size()*2);
-      for (auto& i : v) {
-	double l = getFromPoint(i.first.min_corner(),bestdim);
-	if (std::isfinite(l)) vals.push_back(l);
-	l = getFromPoint(i.first.max_corner(),bestdim);
-	if (std::isfinite(l)) vals.push_back(l);
-      }
-      if (vals.size()==0) {
-	cut = 0;
-      } else {
-	std::sort(vals.begin(), vals.end());
-	if (vals[0]!=vals[vals.size()-1]) {
-	  int firstnb, lastnb;
-	  for (firstnb=0; vals[firstnb]==vals[0]; firstnb++);
-	  for (lastnb=vals.size()-1; vals[lastnb]==vals[vals.size()-1]; lastnb--);
-	  if (vals[lastnb]==vals[0]) { // only two values
-	    cut = (vals[firstnb]+vals[lastnb])/2;
-	  } else {
-	    cut=vals[(firstnb+lastnb)/2];
-	  }
+    std::vector<double> vals;
+    vals.reserve(v.size()*2);
+    for (auto& i : v) {
+      double l = getFromPoint(i.first.min_corner(),bestdim);
+      if (std::isfinite(l)) vals.push_back(l);
+      l = getFromPoint(i.first.max_corner(),bestdim);
+      if (std::isfinite(l)) vals.push_back(l);
+    }
+    if (vals.size()==0) {
+      cut = 0;
+    } else {
+      std::sort(vals.begin(), vals.end());
+      if (vals[0]!=vals[vals.size()-1]) {
+	int firstnb, lastnb;
+	for (firstnb=0; vals[firstnb]==vals[0]; firstnb++);
+	for (lastnb=vals.size()-1; vals[lastnb]==vals[vals.size()-1]; lastnb--);
+	if (vals[lastnb]==vals[0]) { // only two values
+	  cut = (vals[firstnb]+vals[lastnb])/2;
 	} else {
-	  cut=vals[0];
+	  cut=vals[(firstnb+lastnb)/2];
 	}
+      } else {
+	cut=vals[0];
       }
     }
     //    std::cerr << "splitting " << get_name() << " at " << bestdim << "=" << cut << std::endl;
