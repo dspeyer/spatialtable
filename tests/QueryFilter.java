@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.nio.ByteBuffer;
 import java.util.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration; 
@@ -42,7 +43,7 @@ public class QueryFilter{
 	    scan.addColumn(Bytes.toBytes("StoreInformation"), Bytes.toBytes("name"));
 	    double vol = 1;
 	    for (int i=0; i<row.length/2; i++) {
-		String col="dim"+((i/2)+1);
+		String col="dim"+(i+1);
 		double start = Double.parseDouble(row[2*i]);
 		double end = Double.parseDouble(row[2*i+1]);
 		vol *= end - start;

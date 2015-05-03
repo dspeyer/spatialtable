@@ -76,7 +76,7 @@ public class CreateTable {
 		//accepts column family name, qualifier/row name, value
 		p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("name"),Bytes.toBytes(row[0]));
 		for (int i=1; i<row.length; i++) {
-		    p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("dim"+i),Bytes.toBytes(Double.parseDouble(row[1])));
+		    p.add(Bytes.toBytes("StoreInformation"),Bytes.toBytes("dim"+i),Bytes.toBytes(Double.parseDouble(row[i])));
 		}
 		//Saving the put Instance to the HTable
 		hTable.put(p);
