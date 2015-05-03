@@ -81,6 +81,12 @@ bin/randtest.o: tests/randtest.cc tests/testlib.h
 randtest: bin/testlib.o bin/randtest.o bin/libclient.o bin/wraphdfs.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
 	g++ -g -o randtest bin/testlib.o bin/randtest.o bin/libclient.o bin/wraphdfs.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS} `Magick++-config --libs`
 
+bin/exprandtest.o: tests/exprandtest.cc tests/testlib.h
+	${COMPILE}  -o bin/exprandtest.o tests/exprandtest.cc
+
+exprandtest: bin/testlib.o bin/exprandtest.o bin/libclient.o bin/wraphdfs.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
+	g++ -g -o exprandtest bin/testlib.o bin/exprandtest.o bin/libclient.o bin/wraphdfs.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS}
+
 bin/makeHeatMap.o: tests/makeHeatMap.cc
 	${COMPILE}  -o bin/makeHeatMap.o tests/makeHeatMap.cc	`Magick++-config --cppflags`
 
