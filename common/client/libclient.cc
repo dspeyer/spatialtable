@@ -34,6 +34,7 @@ Status::StatusValues TableStub::Insert(const Box& b, const std::string& value, i
   if (ti[0].status().status()!=Status::Success) {
     return ti[0].status().status();
   }
+  //  std::cerr << "inserting into " << ti[0].name() << " on " << ti[0].server() << std::endl;
   TabletServerService_Stub* stub = getStub(ti[0].server());
   Status response;
   InsertRequest request;
@@ -42,6 +43,9 @@ Status::StatusValues TableStub::Insert(const Box& b, const std::string& value, i
   request.mutable_data()->set_value(value);
   try {
     stub->Insert(request, &response, 1000);
+    if (response.status()!=Status::Success) {
+      std::cerr << "error " << Status::StatusValues_Name(response.status()) << " while inserting into " << ti[0].name() << " on " << ti[0].server() << std::endl;
+    }
     return response.status();
   } catch (rpcz::rpc_error &e) {
     return Status::ServerDown;
