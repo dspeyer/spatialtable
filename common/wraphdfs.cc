@@ -29,6 +29,12 @@ void HdfsFile::write(const std::string& data) {
   return hdfsExists(fs, fn.c_str());
 }
 
+/*static*/ void HdfsFile::init() {
+  if (!fs) {
+    fs=hdfsConnect("default",0);
+  }
+}
+
 HdfsFile::~HdfsFile() {
   hdfsCloseFile(fs, file);
 }

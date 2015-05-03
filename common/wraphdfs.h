@@ -15,6 +15,7 @@ class HdfsFile {
   std::string read();
   void write(const std::string& data);
   static bool exists(const std::string& fn);
+  static void init();
   ~HdfsFile();
   static int WRITE;
   static int READ;

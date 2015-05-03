@@ -246,6 +246,7 @@ int main(int argc, char **argv) {
   rpcz::server server(*application);
   TabletServerServiceImpl tabletserver_service;
   server.register_service(&tabletserver_service);
+  HdfsFile::init();
   cout << "Serving requests on port " << port << endl;
   server.bind("tcp://*:"+port);
   application->run();
