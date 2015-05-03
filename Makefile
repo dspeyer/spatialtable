@@ -81,6 +81,11 @@ bin/randtest.o: tests/randtest.cc tests/testlib.h
 randtest: bin/testlib.o bin/randtest.o bin/libclient.o bin/wraphdfs.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o
 	g++ -g -o randtest bin/testlib.o bin/randtest.o bin/libclient.o bin/wraphdfs.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o ${LIBS} `Magick++-config --libs`
 
+bin/makeHeatMap.o: tests/makeHeatMap.cc
+	${COMPILE}  -o bin/makeHeatMap.o tests/makeHeatMap.cc	`Magick++-config --cppflags`
+
+makeHeatMap: bin/makeHeatMap.o
+	g++ -g -o makeHeatMap  bin/makeHeatMap.o ${LIBS} `Magick++-config --libs`
 
 tests/CreateTable.class: tests/CreateTable.java
 	javac tests/CreateTable.java
