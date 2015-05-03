@@ -162,7 +162,6 @@ class TabletServerServiceImpl : public TabletServerService {
 
   virtual void UnLoadTablet(const UnLoadRequest& request, rpcz::reply<Status> reply) {
     std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
-    std::lock_guard<std::mutex> listguard(namelistlock);
     Status response;
     auto it = tablets.find(request.tablet());
     if (it==tablets.end()) {
@@ -177,15 +176,17 @@ class TabletServerServiceImpl : public TabletServerService {
     if (status!=Status::Success) {
       std::cerr << "Failed to remove old " << t->get_name() << " code " << Status::StatusValues_Name(status) << std::endl;
     }
+    namelistlock.lock();
+    it = tablets.find(request.tablet());
     tablets.erase(it);
     delete t;
+    namelistlock.unlock();
     response.set_status(Status::Success);
     reply.send(response);
   }
 
   virtual void LoadTablet(const LoadRequest& request, rpcz::reply<Status> reply) {
     std::lock_guard<std::mutex> guard(tabletlocks[request.tablet()]);
-    std::lock_guard<std::mutex> listguard(namelistlock);
     Status response;
     tablet * t = tablet::New("",request.dim(),2);
     if (t==NULL) {
@@ -207,7 +208,9 @@ class TabletServerServiceImpl : public TabletServerService {
       return;
     }
     std::cout << "done with tablet stuff\n";
+    namelistlock.lock();
     tablets[t->get_name()]=t;
+    namelistlock.unlock();
     std::cout << "inserting self\n";
     if (t->get_layer() > 0) {
       TableStub stub(t->get_table(), application);
