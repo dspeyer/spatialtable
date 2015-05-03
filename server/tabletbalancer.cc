@@ -32,6 +32,7 @@ for (int i = 0; i < 4; i++) {
    } catch (rpcz::rpc_error &e) {
       cout << "Error: " << e.what() << endl;;     
   }
+   cout << "server: "<< server[i] << " load: " << serverTotalLoad[i] << endl;
 }
 
 int min = 0;
@@ -49,31 +50,33 @@ for (int i=0; i < 4; i++){
   }
 }
 
-cout << "Figured out which server has the max load, server " << max <<endl;
+cout << "Max load server: " << server[max] << " load: " << serverTotalLoad[max] << ":" << maxval << endl;
+cout << "Min load server: " << server[min] << " load: " << serverTotalLoad[min] << ":" << minval << endl;
 int numRowsToMove; 
 if (serverTotalLoad[max] == 0) {
      numRowsToMove = 0;
 } else {
    numRowsToMove = (serverTotalLoad[max] - serverTotalLoad[min])/2;
+   cout << "set numRowsToMove to " << numRowsToMove << endl;
 }
 int diff = 0;
 int minDiff = 0;
-int tabletToMove = 0;
-cout << "tabletToMove is " << tabletToMove <<" and mindiff is " << minDiff << endl;
+int tabletToMove = -1;
+cout << "tabletToMove is " << tabletToMove <<" and numRowsToMove is " << numRowsToMove << endl;
 
 if (numRowsToMove != 0) {
-
-
-
         for(int i=0; i< tablets[max].results_size(); i++){
-                if( (diff = tablets[max].results(i).size() % numRowsToMove) >= 0){
-                        if( diff < minDiff) {
-                                minDiff = diff;
+                if( (numRowsToMove > tablets[max].results(i).size() )  ){
+                        if( minDiff < tablets[max].results(i).size()) {
+                                minDiff = tablets[max].results(i).size();
                                 tabletToMove = i;
                         }
-                }       
+                } else {
+                continue;
+        }       
         }
-
+        
+        if(tabletToMove > -1){ 
         cout << "tabletToMove is " << tablets[max].results(tabletToMove).name() << " (" << tabletToMove <<") from " << server[max] << " to " << server[min] << "and mindiff is " << minDiff << endl; 
 
         TabletServerService_Stub stub(application.create_rpc_channel("tcp://"+server[max]));
@@ -100,8 +103,18 @@ if (numRowsToMove != 0) {
                 cout << "Error: " << e.what() << endl;
 		exit(1);
         }
-
+        } else { 
+                sleep(5);
+        }
+        // clear totals
+        serverTotalLoad = {0, 0, 0, 0};
+        numRowsToMove = 0;
+        cout << "******** Iteration done ********" << endl;
+        
 } else{
+cout << "******** Nothing to do ***********" << endl;
+serverTotalLoad = {0, 0, 0, 0};
+numRowsToMove = 0;
 sleep(5);
       }
 } 

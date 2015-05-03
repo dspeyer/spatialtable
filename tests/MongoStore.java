@@ -29,30 +29,31 @@ public class MongoStore{
                 DB db = mongoClient.getDB( "myDB" );
                 System.out.println("Connect to database successfully");
                 
-                
-                DBCollection coll = db.getCollection("Starbuck"); 
-                System.out.println("Collection mycoll selected successfully"); 
-                
+                String[] tableName = args[0].split("\\."); 
+                DBCollection coll = db.getCollection(tableName[0]); 
+                System.out.println("Collection "+tableName[0]+ "  selected successfully"); 
             
                 br = new BufferedReader(new FileReader(args[0]));
                 while ((line = br.readLine()) != null){
 		    String[] row = line.split(csvSplitBy);
 		    
 		    BasicDBObject doc = new BasicDBObject("name", (row[0]));
-		    for (int i=1; i<row.length; i++) {
-			doc.append("dim"+i, Double.parseDouble(row[i]));
-		    }
+                    double[] coord = {Double.parseDouble(row[2]), Double.parseDouble(row[1])};
+                    doc.append("loc",coord);
+                   // System.out.println("loc: "+row[2]+" "+ row[1]);
+		    //for (int i=1; i<row.length; i++) {
+		    //   	doc.append("dim"+i, Double.parseDouble(row[i]));
+		    //}
                                     
 		    coll.insert(doc);
 		    count++;
 		    if (count % 1000 == 0) {
 			System.out.println("inserted "+count);
 		    }
-
 		}
                 
             }catch(Exception e){
                 System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            } 
+            }
         }
 }

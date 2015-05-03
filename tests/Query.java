@@ -13,11 +13,13 @@ import java.net.UnknownHostException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.Arrays;
+import java.util.List;
+import java.util.LinkedList;
+
 
 public class Query{
         public static void main( String args[] ) throws UnknownHostException{
@@ -28,8 +30,9 @@ public class Query{
                 DB db = mongoClient.getDB( "myDB" );
                 System.out.println("Connect to database successfully");
                 
-                DBCollection collection = db.getCollection("Starbuck"); 
-                System.out.println("Collection mycoll selected successfully"); 
+                DBCollection collection = db.getCollection("Starbucks"); 
+                System.out.println("Collection Starbucks selected successfully");
+                collection.createIndex(new BasicDBObject("loc","2dsphere"),"geoIndex");
 
                 
                 long startTime = System.nanoTime();
@@ -50,16 +53,22 @@ public class Query{
                 int random2 = rand.nextInt(45)+45;
                 int random3 = rand.nextInt(90)+1;
                 int random4 = rand.nextInt(90)+90;
-                BasicDBObject query = new BasicDBObject();
-                query.put("latitude", new BasicDBObject("$gt",random1).append("$lte", random2));
-                query.put("longitude", new BasicDBObject("$gt",random3).append("$lte", random4));
+                //BasicDBObject query = new BasicDBObject();
+                //query.put("latitude", new BasicDBObject("$gt",random1).append("$lte", random2));
+                //query.put("longitude", new BasicDBObject("$gt",random3).append("$lte", random4));
                 //BasicDBObject query = new BasicDBObject.append("latitude", new BasicDBObject("$lte", 50));
-                
+                LinkedList<double[]> box = new LinkedList<double[]>();
+                // Set the lower left point
+                box.addLast(new double[] {  random3, random1 });
+                // Set the upper right point
+                box.addLast(new double[] { random4, random2 });
 
+                BasicDBObject query = new BasicDBObject("loc", new BasicDBObject("$geoWithin", new BasicDBObject("$box", box))); 
                 DBCursor cursor = collection.find(query);
-                     while (cursor.hasNext()) {
-                      System.out.println(cursor.next());
-                       }
+                while (cursor.hasNext()) {
+                        System.out.println("in loop\n");
+                        System.out.println(cursor.next());
+                }
           }
 
 }
