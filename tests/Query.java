@@ -22,7 +22,7 @@ import java.util.LinkedList;
 
 
 public class Query{
-        public static void main( String args[] ) throws UnknownHostException{
+    public static void main( String args[] ) throws UnknownHostException, FileNotFoundException, IOException{
 
                 // To connect to mongodb server
                 MongoClient mongoClient = new MongoClient( "localhost" , 27017 ); 
@@ -30,45 +30,43 @@ public class Query{
                 DB db = mongoClient.getDB( "myDB" );
                 System.out.println("Connect to database successfully");
                 
-                DBCollection collection = db.getCollection("Starbucks"); 
-                System.out.println("Collection Starbucks selected successfully");
-                collection.createIndex(new BasicDBObject("loc","2dsphere"),"geoIndex");
+                DBCollection collection = db.getCollection(args[1]); 
+                System.out.println("Collection "+args[1]+"selected");
 
                 
-                long startTime = System.nanoTime();
-                for(int i=1; i<=10;i++){
-                rangequery(collection);
-                
-                    }
+		BufferedReader br = new BufferedReader(new FileReader(args[0]));
+		String line;
+		while ((line = br.readLine()) != null){
+		    //System.out.println("query: "+line);
+		    String[] row = line.split(",");
+		    double x1 = Double.parseDouble(row[0]);
+		    double x2 = Double.parseDouble(row[1]);
+		    double y1 = Double.parseDouble(row[2]);
+		    double y2 = Double.parseDouble(row[3]);
+		    double area = (x2-x1)*(y2-y1);
 
-                long endTime = System.nanoTime();
-                long responseTime = (endTime -startTime)/10;
-                System.out.println(responseTime);  //nano seconds
+		    long startTime = System.nanoTime();
+		    //LinkedList<double[]> box = new LinkedList<double[]>();
+		    // Set the lower left point
+		    //box.addLast(new double[] {  x1, y1 });
+		    // Set the upper right point
+		    //box.addLast(new double[] { x2, y2 });
 
-            }
+		    double[][] box = { { x1, y1 }, { x2, y2 }};
 
-        private static void rangequery(DBCollection collection){
-                Random rand = new Random();
-                int random1 = rand.nextInt(45)+1;
-                int random2 = rand.nextInt(45)+45;
-                int random3 = rand.nextInt(90)+1;
-                int random4 = rand.nextInt(90)+90;
-                //BasicDBObject query = new BasicDBObject();
-                //query.put("latitude", new BasicDBObject("$gt",random1).append("$lte", random2));
-                //query.put("longitude", new BasicDBObject("$gt",random3).append("$lte", random4));
-                //BasicDBObject query = new BasicDBObject.append("latitude", new BasicDBObject("$lte", 50));
-                LinkedList<double[]> box = new LinkedList<double[]>();
-                // Set the lower left point
-                box.addLast(new double[] {  random3, random1 });
-                // Set the upper right point
-                box.addLast(new double[] { random4, random2 });
-
-                BasicDBObject query = new BasicDBObject("loc", new BasicDBObject("$geoWithin", new BasicDBObject("$box", box))); 
-                DBCursor cursor = collection.find(query);
-                while (cursor.hasNext()) {
-                        System.out.println("in loop\n");
-                        System.out.println(cursor.next());
-                }
-          }
-
+		    //		    System.out.println("making query");
+		    BasicDBObject query = new BasicDBObject("loc", new BasicDBObject("$geoWithin", new BasicDBObject("$box", box)));
+		    //System.out.println("getting cursor");
+		    DBCursor cursor = collection.find(query);
+		    //System.out.println("got cursor");
+		    int cnt=0;
+		    while (cursor.hasNext()) {
+			cursor.next();
+			cnt++;
+		    }
+		    long endTime = System.nanoTime();
+		    long responseTime = (endTime -startTime);
+		    System.out.println(area+","+cnt+","+(responseTime/1e6));
+		}
+	}
 }
