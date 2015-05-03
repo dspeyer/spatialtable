@@ -57,7 +57,22 @@ public:
       b.add_start(val);
       b.add_end(val+.00001);
     }
-    stub.Insert(b, "x", 2);
+    std::vector<int> delays={1,3,5,-1};
+    for (int delay : delays) {
+      auto status = stub.Insert(b, "x", 2);
+      if (status == Status::Success) return;
+      std::cerr << "Error inserting ";
+      for (double val : v) {
+	std::cerr << val << ", ";
+      }
+      std::cerr << Status::StatusValues_Name(status);
+      if (delay>0) {
+	std::cerr << " sleeping " << delay << " seconds and retrying" << std::endl;
+	sleep(delay);
+      } else {
+	std::cerr << " giving up\n";
+      }
+    }
   }
   virtual int query(const std::vector<double>& start, const std::vector<double>& end) {
     Box b;
