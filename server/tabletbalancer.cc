@@ -57,16 +57,16 @@ if (serverTotalLoad[max] == 0) {
      numRowsToMove = 0;
 } else {
    numRowsToMove = (serverTotalLoad[max] - serverTotalLoad[min])/2;
-   cout << "set numRowsToMove to " << numRowsToMove << endl;
+   cout << "Rows to move:  " << numRowsToMove << endl;
 }
 int diff = 0;
 int minDiff = 0;
 int tabletToMove = -1;
-cout << "tabletToMove is " << tabletToMove <<" and numRowsToMove is " << numRowsToMove << endl;
+cout << "Tablet to Move: " << tabletToMove <<"Rows to move:  " << numRowsToMove << endl;
 
 if (numRowsToMove != 0) {
         for(int i=0; i< tablets[max].results_size(); i++){
-                if( (numRowsToMove > tablets[max].results(i).size() )  ){
+                if( (numRowsToMove >= tablets[max].results(i).size() )  ){
                         if( minDiff < tablets[max].results(i).size()) {
                                 minDiff = tablets[max].results(i).size();
                                 tabletToMove = i;
@@ -77,7 +77,7 @@ if (numRowsToMove != 0) {
         }
         
         if(tabletToMove > -1){ 
-        cout << "tabletToMove is " << tablets[max].results(tabletToMove).name() << " (" << tabletToMove <<") from " << server[max] << " to " << server[min] << "and mindiff is " << minDiff << endl; 
+        cout <<"Moving tablet: " << tablets[max].results(tabletToMove).name() << " (" << tabletToMove <<") from " << server[max] << " to " << server[min] << endl; 
 
         TabletServerService_Stub stub(application.create_rpc_channel("tcp://"+server[max]));
         UnLoadRequest request;
