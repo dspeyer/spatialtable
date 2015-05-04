@@ -112,7 +112,7 @@ int main(int argc, char ** argv) {
       serverTotalLoad = {0, 0, 0, 0};
       numRowsToMove = 0;
       serverTotalTablets = {0, 0, 0, 0};
-      cout << "******** Iteration done ********" << endl;
+      cout << "******** Iteration done **********" << endl;
             
     } else{
       // clear totals
