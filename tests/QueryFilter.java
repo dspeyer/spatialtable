@@ -64,7 +64,8 @@ public class QueryFilter{
 	    ResultScanner scanner1 = table.getScanner(scan); 
 	    int cnt=0;
 	    for (Result res : scanner1) { 
-		cnt++;
+		//		System.out.println(res.getValueAsByteBuffer(Bytes.toBytes("StoreInformation"),Bytes.toBytes("dim1")).getDouble()+","+res.getValueAsByteBuffer(Bytes.toBytes("StoreInformation"),Bytes.toBytes("dim2")).getDouble());
+		cnt++; 	
 	    }
 	    scanner1.close();
 	    long endTime = System.nanoTime();

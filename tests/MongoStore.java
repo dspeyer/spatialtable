@@ -40,7 +40,7 @@ public class MongoStore{
 		    String[] row = line.split(csvSplitBy);
 		    
 		    BasicDBObject doc = new BasicDBObject("name", (row[0]));
-                    double[] coord = {Double.parseDouble(row[2]), Double.parseDouble(row[1])};
+                    double[] coord = {Double.parseDouble(row[1]), Double.parseDouble(row[2])};
 		    if (coord[0]<min) min=coord[0];
 		    if (coord[0]>max) max=coord[0];
 		    if (coord[1]<min) min=coord[1];
