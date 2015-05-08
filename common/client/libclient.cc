@@ -77,20 +77,26 @@ QueryResponse TableStub::Query(const Box& b, bool is_within) {
     out.mutable_status()->set_status(tis[0].status().status());
     return out;
   }
-  for (TabletInfo ti : tis) {
-    TabletServerService_Stub* stub = getStub(ti.server());
-    QueryResponse response;
-    QueryRequest request;
-    request.set_tablet(ti.name());
-    request.set_is_within(is_within);
-    request.mutable_query()->CopyFrom(b);
-    try {
-      stub->Query(request, &response, 1000);
-      if (response.status().status()==Status::Success) {
-	out.mutable_results()->MergeFrom(response.results());
-      }
-    } catch (rpcz::rpc_error &e) {
+  std::vector<rpcz::rpc> rpcs(tis.size());
+  std::vector<QueryResponse> responses(tis.size());
+  std::vector<QueryRequest> requests(tis.size());
+  for (unsigned int i=0; i<tis.size(); i++) {
+    TabletServerService_Stub* stub = getStub(tis[i].server());
+    requests[i].set_tablet(tis[i].name());
+    requests[i].set_is_within(is_within);
+    requests[i].mutable_query()->CopyFrom(b);
+    rpcs[i].set_deadline_ms(1000);
+    stub->Query(requests[i], &responses[i], &rpcs[i], NULL);
+  }
+  for (unsigned int i=0; i<tis.size(); i++) {
+    rpcs[i].wait();    
+  }
+  for (unsigned int i=0; i<tis.size(); i++) {
+    if (rpcs[i].ok()) {
+      out.mutable_results()->MergeFrom(responses[i].results());
+    } else {
       out.mutable_status()->set_status(Status::ServerDown);
+      return out;
     }
   }
   if (out.results_size()) {
