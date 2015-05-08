@@ -108,6 +108,9 @@ tests/QueryFilter.class: tests/QueryFilter.java
 midterm.pdf: midterm.tex querytimes.png
 	pdflatex midterm.tex
 
+final.pdf: final.tex querytimes.png
+	pdflatex final.tex
+
 clean:
 	rm bin/*.o
 	rm common/gen/*.h
