@@ -42,7 +42,7 @@ public:
     for (int x=0; x<imgSize; x++) {
       for (int y=0; y<imgSize; y++) {
 	double v = ((double)cnt[x][y])/maxcnt;
-	v = sqrt(v);
+	v = pow(v,.25);
 	//std::cout << v << std::endl;
 	if (v<.25) {
 	  image[x][y][0] = 0;
