@@ -6,6 +6,9 @@
 #include "../common/gen/tabletserver.rpcz.h"
 #include "../common/utils.h"
 #include "../common/client/libclient.h"
+#include <readline/readline.h>
+#include <readline/history.h>
+#include "../common/wraphdfs.h"
 
 using namespace std;
 
@@ -98,22 +101,25 @@ void tableInsert(TableStub* stub, int argc, char** argv) {
 }
 
 void tableMultiInsert(TableStub* stub, int argc, char** argv) {
-  if (argc<3 || argc%2==0) {
-    cout << "Usage: insert tablet value start_0 end_0 start_1 end_1...\n";
+  if (argc<4 || argc%2==1) {
+    cout << "Usage: insert table count value start_0 end_0 start_1 end_1...\n";
     return;
   }
-  string value=argv[0];
+  int count = atoi(argv[0]);
+  string value=argv[1];
   Box box;
-  for (int i=1; i<argc-1; i+=2) {
+  for (int i=2; i<argc-1; i+=2) {
     box.add_start(atof(argv[i]));
     box.add_end(atof(argv[i+1]));
   }
-  for (int i=0; i<5; i++) {
+  for (int i=0; i<count; i++) {
     Status::StatusValues response = stub->Insert(box, value, 2);
     cout << Status::StatusValues_Name(response) << endl;
     box.set_start(0, box.start(0)+10);
     box.set_end(0, box.end(0)+10);
   }
+  Status::StatusValues response = stub->Insert(box, value, 2);
+  cout << Status::StatusValues_Name(response) << endl;
 }
 
 void tableRemove(TableStub* stub, int argc, char** argv) {
@@ -258,7 +264,65 @@ map<string, callbackTable> ops = {
   {"query", tableQuery}
 };
 
+
+void createHC(rpcz::application* application, int argc, char** argv) {
+  vector<string> servers = {"128.59.146.138:5555", "128.59.150.196:5555","128.59.46.146:5555","128.59.149.122:5555"};
+  for (string& server : servers) {
+    TabletServerService_Stub *stub;
+    stub = new TabletServerService_Stub(application->create_rpc_channel("tcp://"+server), true);
+    if (stub) {
+      create(stub, argc, argv);
+      return;
+    }
+  }
+  cout << "Could not find any servers\n";
+}
+
+void shell() {
+  HdfsFile::init();
+  rpcz::application application;
+  map<string, TableStub*> stubcache;
+  char* line;
+  while ((line = readline ("SpatialTable> "))) {
+    add_history (line);
+    char* argv[1024];
+    char** curword=argv;
+    int newword=1;
+    for (int i=0; line[i]; i++) {
+      if (line[i]==' ') {
+	line[i]=0;
+	newword=1;
+      } else if (newword) {
+	*curword++ = &line[i];
+	newword=0;
+      }
+    }
+    int argc = curword - argv;
+    if (!strcmp(argv[0], "create")) {
+      createHC(&application, argc-1, argv+1);
+      continue;
+    }
+    if (argc<2) {
+      cout << "usage: command table args\n";
+      continue;
+    }
+    if (!stubcache[argv[1]]) {
+      stubcache[argv[1]] = new TableStub(argv[1], &application);
+    }
+    auto callback = ops[argv[0]];
+    if (callback) {
+      callback(stubcache[argv[1]], argc-2, argv+2);
+    } else {
+      cout << "Unknown Command '" << argv[0] << "'\n";
+    }
+  }
+}
+
 int main(int argc, char ** argv) {
+  if (argc==2 && !strcmp(argv[1],"shell")) {
+    shell();
+    return 0;
+  }
   if (argc<3) {
     cout << "Usage: \n  ./client command serverhost:serverport|table <args>\n  commands are:\n";
     for (auto i : ops) {
@@ -277,7 +341,7 @@ int main(int argc, char ** argv) {
   } else if (cb2) {
     TableStub stub(argv[2], &application);
     cb2(&stub, argc-3, argv+3);
-  } else {
+  }else {
     cout << "Unknown command: " << argv[1] << "\n";
   }
 

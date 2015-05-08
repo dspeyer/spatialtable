@@ -30,7 +30,7 @@ bin/stclient.o: client/stclient.cc common/gen/tabletserver.pb.h common/gen/table
 	${COMPILE} -o bin/stclient.o client/stclient.cc
 
 stclient: bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o bin/wraphdfs.o
-	g++ -g -o stclient bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o bin/wraphdfs.o ${LIBS}
+	g++ -g -o stclient bin/stclient.o bin/tabletserver.pb.o bin/tabletserver.rpcz.o bin/libclient.o bin/wraphdfs.o ${LIBS} -lreadline
 
 # Server
 
