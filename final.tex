@@ -1,8 +1,13 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\twocolumn
-%\usepackage{stfloats} 
+\usepackage{stfloats} 
 \usepackage{graphicx}
+\usepackage[superscript,biblabel]{cite}
+\usepackage{url}
+\usepackage{caption}
+\usepackage{subcaption}
+\twocolumn
+\flushbottom
 \begin{document}
 \author{Daniel Speyer\\dls2192 \and Samuel Lee\\hsl2113 \and Peiran Hu\\ph2439}
 \title{SpatialTable: A Distributed Database for Multidimensional Queries}
@@ -24,25 +29,11 @@ The current standard for distributed databases begins by having a single primary
 
 There exist many single-node spatial databases, mostly based on rtrees, quadtrees, or similar structures. They are widely used in geographic applications, as a single node can hold a fairly large amount of data. Still, like all single-node systems, they have a cap on their scalability, and they are not robust against hardware failure.
 
-\subsection{Sample Database Systems}
+\subsection{GeoHashing}
 
-We chose three popular database management systems to investigate and evaluate their solutions to our proposed problem. We chose these databases because they all seemed to have the basics necessary solve such problem and we wanted to evaluate if they had indeed already solved our proposed problem or if at the very least we could leverage them to build a solution of our own. Our candidate database systems were MongoDB, HyperDex, and Hbase.
+Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  However, it requires the range and resolution of the data to be known in advance, does not handle higher dimensional spaces, requires complex calculations, and does not preserve locality perfectly, so some scanning and filtering is still required.  In practice, it tends to work acceptably on real-world data, but it is not a fully general and robust solution.
 
-\subsection{MongoDB}
-
-MongoDB is currently the most popular of the so called document based NoSQL database management system. These systems work similarly to key-value stores, but instead store key-document pairs. These documents can contain any arbitrary piece of information, and can also have other documents nested within, allowing for much more complex structures to be achieved (ie. document within a document within a document). 
-
-Additionally, MongoDB is distributed and has sharding built-in, and of particular interest to us, offers geospatial indexes and queries. However, MongoDB limits the geospatial indexes to either flat surfaces (Euclidean plane, 2d) or spherical Earth-like surfaces (2dsphere indexes) using longitude and latitude, and further prohibits geospatial indexes to be used as shard key indexes. Meaning it is impossible to use this geospatial index divide tables into `tablets' to be stored on different servers, so it limits the way the database can be distributed. Since MongoDB does not allow to scale to n-dimensions for indexes and severely limits the way the database can be distributed with geospatial indexes we concluded that indeed our proposed database system provides a much more flexible solution to our problem, and MongoDB is simply not suitable for solving the type of problems that we envisioned.
-
-MongoDB's spatial indexes are based on a technique called ``geohashing''.  Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  However, it requires the range and resolution of the data to be known in advance, does not handle higher dimensional spaces, requires complex calculations, and does not preserve locality perfectly, so some scanning and filtering is still required.  In practice, it tends to work acceptably on real-world data, but it is not a fully general and robust solution.
-
-\subsection{Hbase}
-
-HBase is a distributed column-oriented database built on top of HDFS. It is a NoSQL technology, which is not intended to replace RDBMS. HBase is designed for supporting store huge amounts of data and random real-time access to the data in indexed Hadoop file system.Tables in HBase are split into regions served by region servers. A table is composed of multiple column families. Each column family contain one or more columns. 
-
-There has been research conducted with HBase to provide a data model for large geospatial datasets called HGrid. It uses a system called ``z-ordering quadtree linearization'', which is roughly the same as MongoDB's geohashing.  It has roughly the same strengths and weaknesses.
-
-\subsection{HyperDex}
+\subsection{Hyperspace Hashing}
 
 Hyperdex uses a different technique called ``hyperspace hashing''. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.
 
@@ -52,11 +43,11 @@ While hyperdex does support range queries, it requires that ``objects' relative 
 
 \section{Design}
 
-Rather than layering on top of a 1-dimensional database, or design uses arbitrary-dimensional tablets as first-class members, giving full flexibility of dimension, range, resolution and distribution with no scan-and-filter needed for standard queries.\
+Rather than layering on top of a 1-dimensional database, our design uses arbitrary-dimensional tablets as first-class members, giving full flexibility of dimension, range, resolution and distribution with no scan-and-filter needed for standard queries.
 
 \subsection{General Design}
 
-Our design is largely inspired by Google's Bigtable. Like Bigtable, we divide our table into tablets, keep our metadata in a table like the original one, and cap the recursion at two levels. Also, like bigtable, we use a general distributed filesystem (hdfs) as our backing store.
+Our design is largely inspired by Google's Bigtable\cite{bigtable}. Like Bigtable, we divide our table into tablets, keep our metadata in a table like the original one, and cap the recursion at two levels. Also, like bigtable, we use a general distributed filesystem (hdfs) as our backing store.
 
 Our system is intended as a proof-of-concept, not a production-ready system. As such, we do not support true statelessness as bigtable does, but store data in RAM and write to hdfs eventually. As such, we are not robust against node failures, but the technologies of write-ahead logging and compactions are already well-established, and we would discover nothing new by re-implementing them.
 
@@ -88,6 +79,11 @@ The number of metadata tablets that must be looked at is one more than the numbe
 
 Queries may be of the form `all boxes within this box' or `all boxes intersecting this box'. In either case, we must search all tablets that intersect the query box. 
 
+\subsubsection{Load Balancer}
+
+\subsubsection{Locking}
+
+
 \subsection{Test Infrastructure}
 
 Currently our infrastructure consists of a four-node cluster of virtual machines with Ubuntu 14.04 LTS on KVM. Each VM runs a datanode on our distributed file system Hadoop File System (HDFS), and our code base is written in C++, using the various libraries outlined next.
@@ -118,58 +114,53 @@ Unfortunately, it uses a naive round-robin thread scheduler which can cause it t
 
 \section{Results}
 
-Thus far, our primary result is that the system works.  We have successfully run the database, distributed across two nodes, inserted data and run queries.
+\subsection{Description of the Benchmarks}
 
-We do have some basic performance data.  We took roughly 7000 Starbucks locations, spread across two nodes, and randomly queried for rectangles of up to 1/10 degree of lattitude and longitude, containing from 0 to 147 Starbucks ($\mu=12, \sigma=33$) and measured the elapsed time.  Times ranged from 5.2ms to 31.4ms ($\mu=9.7, \sigma=3.0$) with a single outlier of 63.7ms.  Query duration was uncorrelated ($r^2=0.16$) to the number of starbucks returned, and there was no sign of multimodality.
+\subsection{Performance at Dimensions}
 
-\begin{figure}[b]
-\includegraphics[width=3in]{querytimes}
-\caption{The cumulative probability function for elapsed time, omitting one outlyer}
-\end{figure}
+\subsection{Comparison to HBase}
 
-\section{Still to Do}
+\subsection{Comparison to MongoDB with GeoHash}
 
-\subsection{Automatic load balancer}
+\section{Applications}
 
-Our tabletservers support unloading tablets to hdfs and loading them back from it, but at present there is no system to coordinate this. We plan to write a balancer that will poll servers for their load and reassign tablets as necessary.
+\subsection{High Resolution Geospatial}
 
-\subsection{Locking}
+\subsection{Geospatialtemporal}
 
-Our system is subject to race condition corruption from simultaneous writes. We intend to write some simple locking to protect from this. We are not targeting ACID -- only the robustness of our internal data structures against races.
+\subsection{DNA ngrams}
 
-\subsection{Optimizations}
+\section{Production Readiness}
 
-While the ultimate goal of this system is performance, thus far we have ignored that except at the algorithmic level. Here are some smaller-scale things that could make it faster. We have not yet decided exactly which of them we will do.
+\subsection{As a Stand Alone}
 
+\subsubsection{Write ahead Logging}
 
-At present we use JINI HDFS, which is considerably slower than native. Also, we reinitialize the HDFS connection every time we touch it. Fixing these should be straightforward.
+\subsubsection{Handling Metadata Timeouts}
 
-Similarly, we do not cache our RPC connections as aggressively as we could, and do not cache metadata at all. We will need to consider whether these will be useful.
+\subsubsection{Catching Dropped Tablets}
 
-At present, we save tablets as a simple list of rows and reconstruct the rtree on load. Relatedly, we copy all query results twice. Improving on these might require making modifications inside boost geometry, which might prevent us from doing it.
+\subsubsection{Discovery and Partition-Resistance}
 
-More generally, we have not profiled our system, and there may be low-hanging optimizations.
+\subsection{As Part of an Existing Database}
 
-\subsection{Measurement}
+\subsubsection{Per-Table Metadata}
 
-The biggest remaining task is not building but measurement. We intend to create a set of benchmarks of varying dimensionalities and distributions, then compare our system to the alternatives mentioned earlier on matching hardware.
+\subsubsection{Protocol}
 
-\section{Future Work}
+\section{Roles}
 
-\subsection{Time Table}
+\section{References}
 
-We envision our schedule for the rest of the semester as follows.
+\begin{thebibliography}{9}
 
-\begin{itemize}
-\item Week of April 6th - Automatic Load Balancer 
-\item Week of April 12th - Provide some locking primitives
-\item Week of April 19th - Write more test cases to obtain measurements and optimize as much as possible
-\item Week of April 26th - Continue optimizing and taking measurements and finalize the demo and final presentation
-\item Week of May 4th - Write Final Report
-\item Week of May 11th - Finalize Final Report and Celebrate!
+\bibitem{bigtable}
+  Chang et al.
+  \emph{Bigtable: a distributed storage system for structured data},
+  OSDI,
+  2006
 
-
-\end{itemize}
+\end{thebibliography}
 
 
 \end{document}
