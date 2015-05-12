@@ -108,7 +108,7 @@ tests/QueryFilter.class: tests/QueryFilter.java
 midterm.pdf: midterm.tex querytimes.png
 	pdflatex midterm.tex
 
-final.pdf: final.tex
+final.pdf: final.tex dimeff.eps nrowseff.eps st_mongo_cumu.eps  stres.eps map100k.png
 	pdflatex final.tex
 
 clean:

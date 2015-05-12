@@ -12,7 +12,7 @@
 \author{Daniel Speyer\\dls2192 \and Samuel Lee\\hsl2113 \and Peiran Hu\\ph2439}
 \title{SpatialTable: A Distributed Database for Multidimensional Queries}
 
-\pretolerance=10000
+%\pretolerance=10000
 
 
 \maketitle
@@ -121,14 +121,33 @@ We do all our benchmarking using queries, because other operations might not be 
 We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}
 
 \begin{figure}[h]
-\includegraphics[width=3.2in]{map100k}
+\centering
+\includegraphics[width=2.5in]{map100k}
 \caption{A Heatmap of 100k Random Rows}
 \label{fig:hm}
 \end{figure}
 
+\begin{figure*}[t]
+\includegraphics[width=2.1in]{stres}
+\includegraphics[width=2.1in]{nrowseff}
+\includegraphics[width=2.1in]{dimeff}
+\caption{SpatialTable Performance: (a) Latency vs Rows Returned for individual queries, showing 10k rows of 2 dimensions, 10k rows of 8 dimensions and 100k rows of 2 dimensions; (b) Latency vs Rows in Database, averaged and blocked by rows returned; (c) Latency vs Dimensions, averaged and blocked by rows returned }
+\label{fig:res}
+\end{figure*}
+
 We the generate random queries using the same distribution.  We select an expected number of results uniformly from the range $(500,2000)$ and create a (hyper)square query to return this.  However, if the query is in a very low-density region of the map, we limit the size of the query so that it does not enter a higher density region, which produces  some queries with significantly fewer results.
 
-\subsection{Performance at Dimensions}
+\subsection{SpatialTable Performance}
+
+Drawing from a database of 100 thousand 2-dimensional rows using this distribution, SpatialTable has a mean latency of 19ms $(\sigma=4.8)$ with a 95th percentile of 28ms and a maximum (out of our 1000 test queries) of 38ms.
+
+The number of rows returned had a strong effect on latency, every hundred rows costing an extra 0.7ms $(r^2=0.54)$.
+
+The number of dimensions had a weaker effect, each dimension costing about 1.4ms $(r^2\approx 0.8)$.  This is a smaller effect because an extra 200 rows in a response is far more likely than an extra dimension.  Our test at 8 dimensions also showed a significant number of outliers, which our tests at 4 and 6 dimensions did not.   This might be an artifact of the testing.
+
+The size of the total database also has a small effect, with a factor of 10 increase costing about 5ms.  Both the figures for dimension and database-size effect are highly susceptable to change in how they are measured.  The volume of the query box did not effect latency at all.
+
+All of this is illustrated in figure \ref{fig:res}.
 
 \subsection{Comparison to HBase}
 
