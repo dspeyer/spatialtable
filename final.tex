@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage[superscript,biblabel]{cite}
 \usepackage{url}
-\usepackage{caption}
+\usepackage[font={small},margin={.2in},labelfont+={it}]{caption}
 \usepackage{subcaption}
 \twocolumn
 \flushbottom
@@ -12,7 +12,7 @@
 \author{Daniel Speyer\\dls2192 \and Samuel Lee\\hsl2113 \and Peiran Hu\\ph2439}
 \title{SpatialTable: A Distributed Database for Multidimensional Queries}
 
-%\pretolerance=10000
+\pretolerance=10000
 
 
 \maketitle
@@ -27,17 +27,26 @@ The current standard for distributed databases begins by having a single primary
 
 \subsection{Spatial Databases}
 
-There exist many single-node spatial databases, mostly based on rtrees, quadtrees, or similar structures. They are widely used in geographic applications, as a single node can hold a fairly large amount of data. Still, like all single-node systems, they have a cap on their scalability, and they are not robust against hardware failure.
+There exist many single-node spatial databases, mostly based on rtrees\cite{rtrees}, quadtrees\cite{quadtrees}, or similar structures\cite{samet}. They are widely used in geographic applications, as a single node can hold a fairly large amount of data. Still, like all single-node systems, they have a cap on their scalability, and they are not robust against hardware failure.
 
 \subsection{GeoHashing}
 
-Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  However, it requires the range and resolution of the data to be known in advance, does not handle higher dimensional spaces, requires complex calculations, and does not preserve locality perfectly, so some scanning and filtering is still required.  In practice, it tends to work acceptably on real-world data, but it is not a fully general and robust solution.
+Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  Conceptually, a finite fractal ``z'' shape is drawn over the space, and every point in the space is mapped to the closest point on the fractal.  Note that this requires both the range and precision of the data to be known at index-construction time.  The distance along the fractal provides a scalar descriptor of the location.  This can be used as a primary key in a classic distributed database.\cite{gh}
+
+\begin{figure}[b!]
+\centering
+\includegraphics[width=3.2in]{geohash}
+\caption{A 4th degree z curve, showing two queries and their respective linearizations.  The blue query has only 50\% overhead, whereas the green has over 30x}
+\label{fig:z}
+\end{figure}
+
+A query in 2-space can then be translated into an approximate query in z-space.  Given a box, it is computationally straightforward to find the first and last points along the z-curve that are inside the box.  Then all points inside the box must also have z values between those two points.  Not all values between those points must be inside the box, but for most queries, most of them will be.  Specifically, the expected overhead grows logarithmically in the size of the total database\cite{ghs}.  This is illustrated in figure \ref{fig:z}. A database can then scan between the points and filter for being inside the box, with good expected (but poor worst-case) efficiency.
 
 \subsection{Hyperspace Hashing}
 
-Hyperdex uses a different technique called ``hyperspace hashing''. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.
+Hyperdex uses a different technique called ``hyperspace hashing''. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.\cite{hh}
 
-According to the original hyperdex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, hyperdex recommends that dimensionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
+According to the original hyperdex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, hyperdex recommends that dimen\-sionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
 
 While hyperdex does support range queries, it requires that ``objects' relative orders for the attribute must be preserved when mapped onto the hyperspace axis.'' Since these attributes are not being hashed, but the attribute space is still divided statically, the system is at high risk of hot spots unless the data's distribution is well known in advance.
 
@@ -65,9 +74,16 @@ This definition, combined with the splitting algorithm, allows us to maintain a 
 
 When a tablet becomes too large, we split it along one dimension, producing three tablets: `less', `crossing' and `more'. The `less' and `more' tablets have smaller borders and the same (if any) lines which must be crossed. The `crossing' tablet has the same borders, but a new line where the split occurred. Entries are then assigned to the new tablets based on how they relate to the split line in that dimension.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=2.5in]{tabsplit}
+\caption{Splitting a 2d tablet}
+\label{fig:split}
+\end{figure}
+
 Note that the `less' and `more' tablets have never-before-seen borders, and the `crossing' tablet has the same borders as the tablet which was just destroyed. This pattern ensures that there will never be two tablets in the same table with the same borders, and therefore that we can safely use the borders as the metadata key.
 
-Finding the split line is a matter for heuristics. The only constraint is that we cannot split a tablet in a dimension for which it already has a must-cross line. Also, it is useless to split a tablet in such a way that all the entries land in the same child tablet. This leaves considerable freedom. Our current heuristic is to take the bounding box of the data actually there, then split it in the widest dimension down the middle. If the widest dimension is infinite (and therefore doesn't have a middle), we take the median after dropping the edges. This is fast, but not optimal. Finding an optimal splitting strategy is an ongoing task.
+Finding the split line is a matter for heuristics. The only constraint is that we cannot split a tablet in a dimension for which it already has a must-cross line. Also, it is useless to split a tablet in such a way that all the entries land in the same child tablet. This leaves considerable freedom. Our current heuristic is to take the bounding box of the data actually there, then split it in the widest dimension. To find the point along that dimension at which to split, we take the median after dropping the edges. In practice this works fairly well, but it is neither optimal nor robust against pathological data.
 
 \subsubsection{Finding a Single Entry}
 
@@ -118,9 +134,7 @@ Unfortunately, it uses a naive round-robin thread scheduler which can cause it t
 
 We do all our benchmarking using queries, because other operations might not be a fair test.  Spatialtable accepts an insertion as soon as the data is in RAM.  Other systems might wait for confirmation from the storage layer.  That would take considerably longer, but not reflect an advantage of our system.
 
-We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}
-
-\begin{figure}[h]
+\begin{figure}[h!]
 \centering
 \includegraphics[width=2.5in]{map100k}
 \caption{A Heatmap of 100k Random Rows}
@@ -135,7 +149,9 @@ We generate random data using 5 gaussians, spread uniformly across the range $(0
 \label{fig:res}
 \end{figure*}
 
-We the generate random queries using the same distribution.  We select an expected number of results uniformly from the range $(500,2000)$ and create a (hyper)square query to return this.  However, if the query is in a very low-density region of the map, we limit the size of the query so that it does not enter a higher density region, which produces  some queries with significantly fewer results.
+We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}
+
+We then generate random queries using the same distribution.  We select an expected number of results uniformly from the range $(500,2000)$ and create a (hyper)square query to return this.  However, if the query is in a very low-density region of the map, we limit the size of the query so that it does not enter a higher density region, which produces  some queries with significantly fewer results.
 
 \subsection{SpatialTable Performance}
 
@@ -153,14 +169,27 @@ All of this is illustrated in figure \ref{fig:res}.
 
 \subsection{Comparison to MongoDB with GeoHash}
 
-While Mongo is approximately 5ms faster than Spatialtable in the median case, it suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:cumu}.
+MongoDB is a popular open-source distributed database with built in geospatial support via geohashing.\cite{mongospatial1}\cite{mongospatial2}  This makes it a natural choice for a comparison.  We compared MongoDB to SpatialTable using 100k rows and the same multigaussian distribution as before.
+
+Mongo is approximately 5ms faster than Spatialtable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
 
 \begin{figure}[h]
-\includegraphics[width=3.2in]{st_mongo_cumu}
-\caption{Cumulative Histogram of MongoDB vs Spatialtable for Requests Returning 1000-1500 Rows Drawn from 100k Rows}
-\label{fig:cumu}
+\includegraphics[width=1.55in]{st_mongo}
+\includegraphics[width=1.55in]{st_mongo_cumu}
+\caption{MongoDB vs Spatialtable Drawn from 100k Rows (a) Individual Requests by Rows Returned; (b) Cumulative Histogram for Requests Returning 1000-1500 Rows }
+\label{fig:mongo}
 \end{figure}
 
+These outliers are exactly what we expect from geohashing in general.  We also expect that a distribution with many points concentrated below the resolution will cause problems.  To trigger this, we reran the test using an exponential distribution.  Each co-ordinate's base 10 log was drawn from a uniform distribution of (-9,9).  We placed the high-density point at the origin to prevent floating point underflow.
+
+With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure \ref{fig:mongoexp}.  The exact nature of this pattern is unclear, but to a first approximation for 38\% of queries the geohashing system worked well, while for the rest it hit resolution issues.  For queries which returned between 1000 and 1500 rows, only 21\% worked well.  The exact numbers are not important, as they are an effect of the exact data chosen, but the lesson is clear: geohashing does not cope well with exponentially distributed data.
+
+\begin{figure}[h]
+\includegraphics[width=1.55in]{st_mongo_exp}
+\includegraphics[width=1.55in]{st_mongo_exp_cumu}
+\caption{The same graphs as figure \ref{fig:mongo}, but with an exponential distribution of rows}
+\label{fig:mongoexp}
+\end{figure}
 
 \section{Applications}
 
@@ -208,19 +237,69 @@ There are also psychological reasons to focus on bad-case latencies for any user
 
 \section{References}
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
+
+\bibitem{rtrees}
+  Guttman.
+  \emph{R-Trees: A Dynamic Index Structure for Spatial Searching.}
+  ACM SigMOD.
+  1984
+
+\bibitem{quadtrees}
+  Finkel and Bentley.
+  \emph{Quad Trees: A Data Structure for Retrieval on Composite Keys.}
+  Acta Informatica.
+  1974
+
+\bibitem{samet}
+  Samet.
+  \emph{Applications of Spatial Data Structures.}
+  Addison Wesley.
+  1990
+
+\bibitem{gh}
+  Morton.
+  \emph{A computer Oriented Geodetic Data Base; and a New Technique in File Sequencing.}
+  IBM Technical Reports. 
+  1966
+
+\bibitem{ghs}
+ Tropf and Herzog
+ \emph{Multidimensional Range Search in Dynamically Balanced Trees.}
+ Angewandte Informatik.
+ 1981
+
+\bibitem{hh}
+  Escriva, Wong and Sirer.
+  \emph{HyperDex: A Distributed, Searchable Key-Value Store.}
+  ACM SigCOMM.
+  2012
 
 \bibitem{bigtable}
   Chang et al.
-  \emph{Bigtable: a distributed storage system for structured data}.
+  \emph{Bigtable: a distributed storage system for structured data.}
   OSDI.
   2006
 
 \bibitem{amazon}
   DeCandia et al.
-  \emph{Dynamo: Amazon’s Highly Available Key-value Store}.
+  \emph{Dynamo: Amazon’s Highly Available Key-value Store.}
   Symposium on Operating Systems Principles.
   2007
+
+\bibitem{mongospatial1}
+  \emph{MongoDB Manual: 2d Index Internals.}
+  \url{http://docs.mongodb.org/manual/core/geospatial-indexes/}
+  2015
+
+
+\bibitem{mongospatial2}
+  \emph{MongoDB Manual: GeoSpatial Tutorials}
+  \url{http://docs.mongodb.org/manual/tutorial/build-a-2d-index/}
+  2015
+
+
+
 \end{thebibliography}
 
 
