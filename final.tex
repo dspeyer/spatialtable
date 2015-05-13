@@ -25,7 +25,7 @@ Both spatial databases and distributed databases have proved useful for a variet
 
 \subsection{Distributed Databases}
 
-The current standard for distributed databases begins by having a single primary key (usually a string) and arbitrary data. The table is sorted by the key, and chopped into ``tablets'' of consecutive rows. Which tablet is on which server is stored in a metadata table, which is part of the database and fits this structure nicely. This makes it easy to search by key, or for a range of keys, but to search for anything else requires either a separate index or reading through the entire table.
+The current standard for distributed databases begins by having a single primary key (usually a string) and arbitrary data. The table is sorted by the key, and chopped into ``tablets'' of consecutive rows. Which tablet is on which server is stored in a metadata table, which is part of the database and fits this structure nicely. This makes it easy to search by key, or for a range of keys, but to search for anything else requires either a separate index or scanning through the entire table.
 
 \subsection{Spatial Databases}
 
