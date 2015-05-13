@@ -12,13 +12,15 @@
 \author{Daniel Speyer\\dls2192 \and Samuel Lee\\hsl2113 \and Peiran Hu\\ph2439}
 \title{SpatialTable: A Distributed Database for Multidimensional Queries}
 
-\pretolerance=10000
+\pretolerance=8000
 
 
 \maketitle
 
-\section{The Problem}
-Current distributed databases only support fast queries to a single, scalar primary key. We propose a system that allows efficient queries based on a multidimensional key, using a fundamentally similar architecture. This has a variety of applications, both in literally spatial data and in more abstract spaces.
+\begin{abstract}
+Both spatial databases and distributed databases have proved useful for a variety of problems.  Furthermore, it is possible, albeit inelegant, to store spatial data in a nonspatial distributed database by means of Geohashing and this has proved useful as well.  We propose a natively spatial distributed database, and evaluate its performance.  While it is not as performant as the existing best-of-class solution in the most common case, it is superior in several other cases.  Finally, we make the claim that these cases are important, and therefore that natively spatial distributed databases are worth pursuing.
+\end{abstract}
+
 \section{Related Work}
 
 \subsection{Distributed Databases}
@@ -31,20 +33,20 @@ There exist many single-node spatial databases, mostly based on rtrees\cite{rtre
 
 \subsection{GeoHashing}
 
-Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  Conceptually, a finite fractal ``z'' shape is drawn over the space, and every point in the space is mapped to the closest point on the fractal.  Note that this requires both the range and precision of the data to be known at index-construction time.  The distance along the fractal provides a scalar descriptor of the location.  This can be used as a primary key in a classic distributed database.\cite{gh}
-
 \begin{figure}[b!]
 \centering
-\includegraphics[width=3.2in]{geohash}
+\includegraphics[width=3in]{geohash}
 \caption{A 4th degree z curve, showing two queries and their respective linearizations.  The blue query has only 50\% overhead, whereas the green has over 30x}
 \label{fig:z}
 \end{figure}
+
+Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  Conceptually, a finite fractal ``z'' shape is drawn over the space, and every point in the space is mapped to the closest point on the fractal.  Note that this requires both the range and precision of the data to be known at index-construction time.  The distance along the fractal provides a scalar descriptor of the location.  This can be used as a primary key in a classic distributed database.\cite{gh}
 
 A query in 2-space can then be translated into an approximate query in z-space.  Given a box, it is computationally straightforward to find the first and last points along the z-curve that are inside the box.  Then all points inside the box must also have z values between those two points.  Not all values between those points must be inside the box, but for most queries, most of them will be.  Specifically, the expected overhead grows logarithmically in the size of the total database\cite{ghs}.  This is illustrated in figure \ref{fig:z}. A database can then scan between the points and filter for being inside the box, with good expected (but poor worst-case) efficiency.
 
 \subsection{Hyperspace Hashing}
 
-Hyperdex uses a different technique called ``hyperspace hashing''. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.\cite{hh}
+Hyperspace hashing is another multidimensional technology. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.\cite{hh}
 
 According to the original hyperdex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, hyperdex recommends that dimen\-sionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
 
@@ -60,13 +62,15 @@ Our design is largely inspired by Google's Bigtable\cite{bigtable}. Like Bigtabl
 
 Our system is intended as a proof-of-concept, not a production-ready system. As such, we do not support true statelessness as bigtable does, but store data in RAM and write to hdfs eventually. As such, we are not robust against node failures, but the technologies of write-ahead logging and compactions are already well-established, and we would discover nothing new by re-implementing them.
 
-We did consider implementing our system as an add-on to hbase (an existing open source distributed database) but the codebase there was too large and insufficiently documented. Just learning our way around it would have been a semester-long project.
+We did consider implementing our system as an add-on to hbase (an existing open source distributed database) but the codebase there was too large and insufficiently documented, so this was not practical.
 
-Since we want to use our same technology for metadata, and the natural shape for tablets is hyperrectangles (henceforth known as ``boxes'' for brevity), the keys to our rows are boxes as well. The data associated with the row is an arbitrary binary blob. For our tests, we used strings, but a user is welcome to put arbitrary protobufs there (as we do for metadata). Supporting bigtable-like columns would again be a practical feature of no research significance.
+In a later section, we discuss both what would be necessary to render our system production-ready, and what would be necessary to merge it with an existing database.
+
+Since we want to use our same technology for metadata, and the natural shape for tablets is hyperrectangles (henceforth known as ``boxes'' for brevity), the keys to our rows are boxes as well. The data associated with the row is an arbitrary binary blob. For our tests, we used strings, but a user is welcome to put protobufs there (as we do for metadata). Supporting bigtable-like columns would again be a practical feature of no research significance.
 
 \subsubsection{Tablets}
 
-Each tablet has borders (a box) and optionally a list of perpendicular lines through that box which all entries inside the tablet must cross. Since all the lines must be perpendicular, there can be at most as many lines as dimensions. In this all-lines case, all entries inside the tablet must contain a single point. The borders of the box may include infinity or negative infinity. An entry from (1,1) to (2,3) would qualify as inside of a tablet from (0,0) to (5,3) but would not qualify as crossing a line at dim$_0$=2.
+Each tablet has borders (a box) and optionally a list of perpendicular hyperplanes through that box which all entries inside the tablet must cross.  For brevity, we refer to these hyperplanes as ``lines'', which they are in the 2-dimensional case.   Since all the lines must be perpendicular, there can be at most as many lines as dimensions. In this all-lines case, all entries inside the tablet must contain a single point. The borders of the box may include infinity or negative infinity. An entry from (1,1) to (2,3) would qualify as inside of a tablet from (0,0) to (5,3) but would not qualify as crossing a line at dim$_0$=2.
 
 This definition, combined with the splitting algorithm, allows us to maintain a vital invariant: for any possible entry, there is always exactly one tablet that should contain it.
 
@@ -99,6 +103,11 @@ Queries may be of the form `all boxes within this box' or `all boxes intersectin
 
 \subsubsection{Locking}
 
+We have a lock on each tablet name, which is held whenever the tablet is in use (including being created or destroyed).  We also have a lock on the map from names to tablets that the tabletserver maintains, which is held whenever creating or destroying tablets.  These are internal locks within the tabletserver that exist to prevent simulataneous accesses from corrupting the data structures.
+
+There is exactly one circumstance in which a lock is held another is waited on: when splitting a tablet, the original tablet remains locked until the metadata updates are complete.  Since the metadata tree is shallow and acyclic, this cannot produce a cyclic wait nor can a significant fraction of threads be blocked at once, unless there are serious delays in an md0 operation.
+
+This provides a tablet-level linearization guarentee to the user.  Since tablets are not a user-visible structure, this amounts to a row-level linearization guarentee.
 
 \subsection{Test Infrastructure}
 
@@ -128,19 +137,6 @@ LibRPCZ is an open-source rpc client/server library using protobufs. It offers c
 
 Unfortunately, it uses a naive round-robin thread scheduler which can cause it to hang if too many RPCs take place before the first one completes. Special thanks to Dmitry Odzerikho of that project for helping us to understand and work around this bug.
 
-\section{Results}
-
-\subsection{Description of the Benchmarks}
-
-We do all our benchmarking using queries, because other operations might not be a fair test.  Spatialtable accepts an insertion as soon as the data is in RAM.  Other systems might wait for confirmation from the storage layer.  That would take considerably longer, but not reflect an advantage of our system.
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=2.5in]{map100k}
-\caption{A Heatmap of 100k Random Rows}
-\label{fig:hm}
-\end{figure}
-
 \begin{figure*}[t]
 \includegraphics[width=2.1in]{stres}
 \includegraphics[width=2.1in]{nrowseff}
@@ -149,9 +145,22 @@ We do all our benchmarking using queries, because other operations might not be 
 \label{fig:res}
 \end{figure*}
 
+\section{Results}
+
+\subsection{Description of the Benchmarks}
+
+We do all our benchmarking using queries, because other operations might not be a fair test.  Spatialtable accepts an insertion as soon as the data is in RAM.  Other systems might wait for confirmation from the storage layer.  That would take considerably longer, but not reflect an advantage of our system.
+
 We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}
 
-We then generate random queries using the same distribution.  We select an expected number of results uniformly from the range $(500,2000)$ and create a (hyper)square query to return this.  However, if the query is in a very low-density region of the map, we limit the size of the query so that it does not enter a higher density region, which produces  some queries with significantly fewer results.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=2.5in]{map100k}
+\caption{A Heatmap of 100k Random Rows}
+\label{fig:hm}
+\end{figure}
+
+We then generate random center points for queries using the same distribution.  We select an expected number of results uniformly from the range $(500,2000)$ and create a (hyper)square query to return this.  However, if the query is in a very low-density region of the map, we limit the size of the query so that it does not enter a higher density region, which produces  some queries with significantly fewer results.
 
 \subsection{SpatialTable Performance}
 
@@ -193,7 +202,7 @@ With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure
 
 \section{Applications}
 
-For most practical geospatial tasks, geohashing is a good solution.  It is fast, well-suited to the most likely tasks, and robustly implemented.  Nevertheless, it suffers from three issues: fixed resolution, strict two dimensionality and high outliers.  We believe there are cases in which these issues are important enough to justify the use of a Spatialtable-like solution instead.
+For most practical geospatial tasks, geohashing is a good solution.  It is fast, well-suited to gps data on the surface of the Earth, and robustly implemented.  Nevertheless, it suffers from three issues: fixed resolution, strict two dimensionality and high outliers.  We believe there are cases in which these issues are important enough to justify the use of a Spatialtable-like solution instead.
 
 \subsection{High Resolution}
 
