@@ -205,6 +205,12 @@ For most practical geospatial tasks, geohashing is a good solution.  It is fast,
 
 \subsubsection{DNA ngrams}
 
+Bacterial population studies routinely produce large amounts of data.  A single 16S Ribosomal sequence is only a few kilobytes, but each bacterium in the sample contains at least one copy of that sequence.  The first task in examining such data is often to match each sequence to similar sequences, either in a reference database or in the rest of the sample.  Similarity is defined in terms of alignment, which is very computationally expensive.
+
+One way to make the examinations more computationally tractable is to use ngrams.  Take all possible sequences of a given length (there are $4^n$) and count how many times they appear in the sequence, including overlapping ones.  Then divide the counts by their sum.  While there is no theoretical guarentee, empirically similar ngram signatures predict similar DNA sequences quite well, even for small $n$.\cite{dna}
+
+One option would then be to create a $4^n-1$ (subtract one because the values sum to 1, so the last one provides no information) dimensional table in SpatialTable and store all the sequences in it.  Then for each new sequence, consider only a small box around it to compute precise alignment scores.
+
 \subsection{High Reliability}
 
 There are circumstances under which the 99th percentile performance is more important than the median.  For example, consider a control system for a swarm of mobile robots. A general increase in database latency harms efficiency, but a single timed out request has the potential to cause physical collisions, damaging the robots or their cargo.  
@@ -281,12 +287,6 @@ There are also psychological reasons to focus on bad-case latencies for any user
   OSDI.
   2006
 
-\bibitem{amazon}
-  DeCandia et al.
-  \emph{Dynamo: Amazon’s Highly Available Key-value Store.}
-  Symposium on Operating Systems Principles.
-  2007
-
 \bibitem{mongospatial1}
   \emph{MongoDB Manual: 2d Index Internals.}
   \url{http://docs.mongodb.org/manual/core/geospatial-indexes/}
@@ -298,6 +298,18 @@ There are also psychological reasons to focus on bad-case latencies for any user
   \url{http://docs.mongodb.org/manual/tutorial/build-a-2d-index/}
   2015
 
+\bibitem{dna}
+  Sun et al.
+  \emph{ESPRIT: estimating species richness using large collections of 16S rRNA pyrosequences.}
+  Nucleic Acids Research.
+  2009
+
+
+\bibitem{amazon}
+  DeCandia et al.
+  \emph{Dynamo: Amazon’s Highly Available Key-value Store.}
+  Symposium on Operating Systems Principles.
+  2007
 
 
 \end{thebibliography}
