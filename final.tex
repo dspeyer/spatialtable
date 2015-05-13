@@ -101,23 +101,25 @@ Queries may be of the form `all boxes within this box' or `all boxes intersectin
 
 \subsubsection{Load Balancer}
 
+The job of the load balancer process is to distribute the "load" of the overall database among the different tablet servers. We have defined the load in our case to be the amount of rows contained in each tablet. We follow a simple algorithm to determine which tablets to move and it is as follows. First, we measure the load in each tablet, but instead of querying each table and counting the number of rows, we make use of the fact that each tablet is an rtree and we simply obtain the size attribute for each rtree which corresponds exactly with the number of rows. Next, we determine which servers have the max and min loads and what is the target number of rows we would ideally like to move to balance the load. It is important to note however, that we do not move individual rows from server to server, but instead move whole tablets. This means that even though we have a target number of rows we would ideally like to move, we still need to search for a tablet that best matches the number of rows we would like to move. If we find one, then we move it from the max loaded server to the min loaded server. If no such tablet can be found, then we do nothing, and wait for the next iteration to hopefully find a better candidate. In our experience, this worked decently well, since we are also leveraging the fact that we are splitting the tablets that get too large and thus have mostly evenly sized tablets.
+
 \subsubsection{Locking}
 
 We have a lock on each tablet name, which is held whenever the tablet is in use (including being created or destroyed).  We also have a lock on the map from names to tablets that the tabletserver maintains, which is held whenever creating or destroying tablets.  These are internal locks within the tabletserver that exist to prevent simulataneous accesses from corrupting the data structures.
 
 There is exactly one circumstance in which a lock is held another is waited on: when splitting a tablet, the original tablet remains locked until the metadata updates are complete.  Since the metadata tree is shallow and acyclic, this cannot produce a cyclic wait nor can a significant fraction of threads be blocked at once, unless there are serious delays in an md0 operation.
 
-This provides a tablet-level linearization guarentee to the user.  Since tablets are not a user-visible structure, this amounts to a row-level linearization guarentee.
+This provides a tablet-level linearization guarantee to the user.  Since tablets are not a user-visible structure, this amounts to a row-level linearization guarantee.
 
 \subsection{Test Infrastructure}
 
-Currently our infrastructure consists of a four-node cluster of virtual machines with Ubuntu 14.04 LTS on KVM. Each VM runs a datanode on our distributed file system Hadoop File System (HDFS), and our code base is written in C++, using the various libraries outlined next.
+Currently our infrastructure consists of a four-node cluster of virtual machines with Ubuntu 14.04 LTS on KVM. Each VM is itself a datanode on our distributed file system Hadoop File System (HDFS). Our code base is written in C++, using the various libraries, and our testing software for comparisons to to other database systems was written in Java and Python.
 
 \subsection{Dependencies}
 
 \subsubsection{HDFS}
 
-HDFS is a fault tolerant scalable distributed storage component of the Hadoop distributed high performance computing platform, inspired by the Google File System. We chose this file system because it met our reliability, scalability, functionality, and performance goals, and had a very well documented installation and development API in C++. 
+HDFS is a fault tolerant scalable distributed storage component of the Hadoop distributed high performance computing platform, inspired by the Google File System. We chose this file system because it met our reliability, scalability, functionality, and performance goals, and has a very well documented installation and development API in C++. 
 
 \subsubsection{Boost Geometry}
 
@@ -125,7 +127,7 @@ Rather than implement our own spatial data structures in memory, we rely on the 
 
 \subsubsection{Boost Serialization}
 
-Since we were already using Boost Geometry to implement our tablets, it was natural to select Boost Serialization as a way to write our data structures to persistent storage in our case HDFS. The stated goals of Boost serialization of deconstructing an arbitrary set of C++ data structures to a sequence of bytes fit our needs perfectly, however we quickly realized that the stated goal was not achieved completely even when dealing with other Boost libraries such as the Boost Geometry library. However, we were able to workaround this incomplete implementation and were able to successfully use Boost Serialization to save our data structures to HDFS.
+Since we were already using Boost Geometry to implement our tablets, it was natural to select Boost Serialization as a way to write our data structures to persistent storage, in our case HDFS. The stated goals of Boost serialization of deconstructing an arbitrary set of C++ data structures to a sequence of bytes fit our needs perfectly, however we quickly realized that the stated goal was in fact still a goal, even when dealing with other Boost libraries such as the Boost Geometry. However, we were able to workaround this incomplete implementation and were able to successfully use Boost Serialization to save our data structures to HDFS.
 
 \subsubsection{Protobuf}
 
@@ -183,7 +185,7 @@ MongoDB is a popular open-source distributed database with built in geospatial s
 Mongo is approximately 5ms faster than Spatialtable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
 
 \begin{figure}[h]
-\includegraphics[width=1.55in]{st_mongo}
+\includegraphics[width=1.55in]{st_mongo_cumu}
 \includegraphics[width=1.55in]{st_mongo_cumu}
 \caption{MongoDB vs Spatialtable Drawn from 100k Rows (a) Individual Requests by Rows Returned; (b) Cumulative Histogram for Requests Returning 1000-1500 Rows }
 \label{fig:mongo}
@@ -216,7 +218,7 @@ For most practical geospatial tasks, geohashing is a good solution.  It is fast,
 
 Bacterial population studies routinely produce large amounts of data.  A single 16S Ribosomal sequence is only a few kilobytes, but each bacterium in the sample contains at least one copy of that sequence.  The first task in examining such data is often to match each sequence to similar sequences, either in a reference database or in the rest of the sample.  Similarity is defined in terms of alignment, which is very computationally expensive.
 
-One way to make the examinations more computationally tractable is to use ngrams.  Take all possible sequences of a given length (there are $4^n$) and count how many times they appear in the sequence, including overlapping ones.  Then divide the counts by their sum.  While there is no theoretical guarentee, empirically similar ngram signatures predict similar DNA sequences quite well, even for small $n$.\cite{dna}
+One way to make the examinations more computationally tractable is to use ngrams.  Take all possible sequences of a given length (there are $4^n$) and count how many times they appear in the sequence, including overlapping ones.  Then divide the counts by their sum.  While there is no theoretical guarantee, empirically similar ngram signatures predict similar DNA sequences quite well, even for small $n$.\cite{dna}
 
 One option would then be to create a $4^n-1$ (subtract one because the values sum to 1, so the last one provides no information) dimensional table in SpatialTable and store all the sequences in it.  Then for each new sequence, consider only a small box around it to compute precise alignment scores.
 
@@ -291,7 +293,7 @@ There are also psychological reasons to focus on bad-case latencies for any user
   2012
 
 \bibitem{bigtable}
-  Chang et al.
+  Changs et al.
   \emph{Bigtable: a distributed storage system for structured data.}
   OSDI.
   2006
