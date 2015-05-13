@@ -2,7 +2,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{stfloats} 
 \usepackage{graphicx}
-\usepackage[superscript,biblabel]{cite}
+\usepackage[superscript,biblabel,space]{cite}
 \usepackage{url}
 \usepackage[font={small},margin={.2in},labelfont+={it}]{caption}
 \usepackage{subcaption}
@@ -178,9 +178,18 @@ All of this is illustrated in figure \ref{fig:res}.
 
 \subsection{Comparison to HBase}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=3.2in]{st_hbase}
+\caption{HBase vs SpatialTable at different database sizes, bucketed by rows returned}
+\label{fig:hb}
+\end{figure}
+
+See figure \ref{fig:hb}.
+
 \subsection{Comparison to MongoDB with GeoHash}
 
-MongoDB is a popular open-source distributed database with built in geospatial support via geohashing.\cite{mongospatial1}\cite{mongospatial2}  This makes it a natural choice for a comparison.  We compared MongoDB to SpatialTable using 100k rows and the same multigaussian distribution as before.
+MongoDB is a popular open-source distributed database with built in geospatial support via geohashing.\cite{mongospatial1,mongospatial2}  This makes it a natural choice for a comparison.  We compared MongoDB to SpatialTable using 100k rows and the same multigaussian distribution as before.
 
 Mongo is approximately 5ms faster than Spatialtable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
 
