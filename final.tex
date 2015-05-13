@@ -21,6 +21,8 @@
 Both spatial databases and distributed databases have proved useful for a variety of problems.  Furthermore, it is possible, albeit inelegant, to store spatial data in a nonspatial distributed database by means of Geohashing and this has proved useful as well.  We propose a natively spatial distributed database, and evaluate its performance.  While it is not as performant as the existing best-of-class solution in the most common case, it is superior in several other cases.  Finally, we make the claim that these cases are important, and therefore that natively spatial distributed databases are worth pursuing.
 \end{abstract}
 
+\section{Introduction}
+Sam
 \section{Related Work}
 
 \subsection{Distributed Databases}
@@ -177,15 +179,15 @@ The size of the total database also has a small effect, with a factor of 10 incr
 All of this is illustrated in figure \ref{fig:res}.
 
 \subsection{Comparison to HBase}
-
+Peiran
 \subsection{Comparison to MongoDB with GeoHash}
 
-MongoDB is a popular open-source distributed database with built in geospatial support via geohashing.\cite{mongospatial1}\cite{mongospatial2}  This makes it a natural choice for a comparison.  We compared MongoDB to SpatialTable using 100k rows and the same multigaussian distribution as before.
+MongoDB is a popular open-source distributed database with built in geospatial support via geohashing.\cite{mongospatial1, mongospatial2}  This makes it a natural choice for a comparison.  We compared MongoDB to SpatialTable using 100k rows and the same multigaussian distribution as before.
 
 Mongo is approximately 5ms faster than Spatialtable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
 
 \begin{figure}[h]
-\includegraphics[width=1.55in]{st_mongo_cumu}
+\includegraphics[width=1.55in]{st_mongo}
 \includegraphics[width=1.55in]{st_mongo_cumu}
 \caption{MongoDB vs Spatialtable Drawn from 100k Rows (a) Individual Requests by Rows Returned; (b) Cumulative Histogram for Requests Returning 1000-1500 Rows }
 \label{fig:mongo}
@@ -209,7 +211,7 @@ For most practical geospatial tasks, geohashing is a good solution.  It is fast,
 \subsection{High Resolution}
 
 \subsubsection{High Resolution Geospatial}
-
+Sam
 \subsection{Higher Dimensional}
 
 \subsubsection{Geospatialtemporal}
@@ -243,15 +245,20 @@ There are also psychological reasons to focus on bad-case latencies for any user
 \subsubsection{Discovery and Partition-Resistance}
 
 \subsubsection{Security}
-
+Sam
 \subsection{As Part of an Existing Database}
-
+Sam
 \subsubsection{Per-Table Metadata}
 
 \subsubsection{Protocol}
 
 \section{Roles}
+What we each did in this section.
+\subsection{Peiran}
 
+\subsection{Sam}
+
+\subsection{Daniel}
 \section{References}
 
 \begin{thebibliography}{99}
