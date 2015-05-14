@@ -224,6 +224,12 @@ With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure
 \label{fig:mongoexp}
 \end{figure}
 
+\section{Theoretical Comparison to Hyperdex}
+
+Hyperdex is an implementation of Hyperspace Hashing -- the existing technology truly distinct from Geohashing.  Unfortunately, we were not able to make it work.  Even simple queries produced undocumented errors from deep in its internals.
+
+We can, however, note that to support range queries, Hyperspace Hashing must use ``order preserving hashes''.  Combined with its static assignment of regions, this ensures it will fail dramatically in the power law distribution case.  Not only will its hashing contribute nothing, but it will store the vast majority of data on a single node.  If this traffic causes that node to fail, the database will become essentially unavailable.
+
 \section{Applications}
 
 For most practical geospatial tasks, geohashing is a good solution.  It is fast, well-suited to gps data on the surface of the Earth, and robustly implemented.  Nevertheless, it suffers from three issues: fixed resolution, strict two dimensionality and high outliers.  We believe there are cases in which these issues are important enough to justify the use of a Spatialtable-like solution instead.
