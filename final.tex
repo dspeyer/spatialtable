@@ -347,13 +347,10 @@ Also, a traditional distributed database only needs a single md0 tablet whose lo
 The protocols spoken by existing distributed database are not designed for spatial data.  All bitstring primary keys will need to be replaced with lists of pairs.  If the protocol was designed for extensibility, this may be possible with minimal disruption.
 
 \section{Roles}
-What we each did in this section.
-\subsection{Peiran}
+
 Peiran Hu was responsible for testing stuff about HBase and MongoDB. She figured out the storage mechanisms and query methods in HBase and MongoDB. She wrote the test cases about 2-D spatial data queries for Starbuck shops through Java Client API for both of the databases.
 
-\subsection{Sam}
-Sam Lee built all of the infrastructure needed to implement our database, and also installed all of the databases used for comparison. He also wrote the basic HDFS access code, and the tablet balancer process.
-\subsection{Daniel}
+Sam Lee built all of the infrastructure needed to implement our database, and also installed all of the databases used for comparison. He also wrote the basic HDFS access code, tablet balancer process, and some testing Python code. 
 
 Daniel Speyer did the basic design; wrote the framework, fundamental operations, tablet-finding code, splitter and client; and devised the test datasets.  He also provided general support to the other team members in their tasks.
 
