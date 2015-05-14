@@ -52,9 +52,9 @@ A query in 2-space can then be translated into an approximate query in z-space. 
 
 Hyperspace hashing is another multidimensional technology. First, each key attribute is `hashed' (the reason for the scare quotes will become apparent). These hashes are then treated as axes of a geometric space, which is statically broken into hyperrectangles (called ``regions'') which are statically assigned to servers.\cite{hh}
 
-According to the original hyperdex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, hyperdex recommends that dimen\-sionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
+According to the original HyperDex paper, the system scales poorly with a high number of regions. Since regions grow exponentially with dimension, HyperDex recommends that dimen\-sionality be kept low, and high-dimension tables be divided into `subspaces' using replication. The system does offer transactions in this replication, though one must worry about the robustness of such a complex system. Also, it requires all the data to be stored once per subspace. Furthermore, queries that specify multiple subspaces only get the benefits of indexing for one, and must scan and filter for the others.
 
-While hyperdex does support range queries, it requires that ``objects' relative orders for the attribute must be preserved when mapped onto the hyperspace axis.'' Since these attributes are not being hashed, but the attribute space is still divided statically, the system is at high risk of hot spots unless the data's distribution is well known in advance.
+While HyperDex does support range queries, it requires that ``objects' relative orders for the attribute must be preserved when mapped onto the hyperspace axis.'' Since these attributes are not being hashed, but the attribute space is still divided statically, the system is at high risk of hot spots unless the data's distribution is well known in advance.
 
 \section{Design}
 
@@ -224,7 +224,7 @@ With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure
 \label{fig:mongoexp}
 \end{figure}
 
-\subsection{Theoretical Comparison to Hyperdex}
+\subsection{Theoretical Comparison to HyperDex}
 
 HyperDex is an implementation of hyperspace hashing -- the existing technology truly distinct from geohashing.  Unfortunately, we were not able to make it work.  Even simple queries produced undocumented errors from deep in its internals.
 
