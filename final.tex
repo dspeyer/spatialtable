@@ -23,7 +23,7 @@ Both spatial databases and distributed databases have proved useful for a variet
 \end{abstract}
 
 \section{Introduction}
-With the explosion of GPS and other location data available from virtually all internet connected devices, coupled with incredibly rich mapping APIs provided by Google and others, applications of all types have been built that use this data for everything from locating the closest restaurant that caters to your late night cravings, to easily splitting the cost of a cab with the closest stranger that happens to be going your way. Applications of this sort have a need to store and quickly query this type of data. However, querying this geospatial data with traditional SQL databases has proved to be very inefficient without the use of pre-generated indexes. Furthermore, it is very difficult to efficiently distribute these types of databases and their additional indexes across multiple database servers. There is no solution currently available to efficiently query this type of two dimensional data without the use of workarounds, that can only be put in place if you already know how exactly you will be using this data. With this type of problem in mind we set out to build a database that was built from the ground up to easily and efficiently handle this two dimensional data without any additional indexes. Additionally, we believed that our design would also extend beyond 2-d to n-dimensions, in a efficient manner not possible with current databases, and distribute to multiple servers. We have created \textit{SpatialTable} with the previously stated goals, and we firmly believe that it provides a solution to the problem of efficiently making multidimensional queries.
+With the explosion of GPS and other location data available from virtually all internet connected devices, coupled with incredibly rich mapping APIs provided by Google and others, applications of all types have been built that use this data for everything from locating the closest restaurant that caters to your late night cravings, to easily splitting the cost of a cab with the closest stranger that happens to be going your way. Applications of this sort have a need to store and quickly query this type of data. However, querying this geospatial data with traditional SQL databases has proved to be very inefficient without the use of pre-generated indexes. Furthermore, it is very difficult to efficiently distribute these types of databases and their additional indexes across multiple database servers, making scalability a difficult proposition at best. There is no solution currently available to efficiently query this type of two dimensional data without the use of workarounds, which can only be put in place if you already know how exactly you will be using this data. With this type of problem in mind we set out to build a database that was built from the ground up to easily and efficiently handle this two dimensional data without any additional indexes. Additionally, we believed that our design would also extend beyond 2-d to n-dimensions, in a efficient manner not possible with current databases, and distribute to multiple servers. This multidimensionality would allow our database to solve a range of problems not currently feasible. A discussion on some of these applications are included in section 5. We have created \textit{SpatialTable} with the previously stated goals, and we firmly believe that it provides a solution to the problem of efficiently making multidimensional queries.
 
 \section{Related Work}
 
@@ -157,7 +157,7 @@ Unfortunately, it uses a naive round-robin thread scheduler which can cause it t
 
 We do all our benchmarking using queries, because other operations might not be a fair test.  Spatialtable accepts an insertion as soon as the data is in RAM.  Other systems might wait for confirmation from the storage layer.  That would take considerably longer, but not reflect an advantage of our system.
 
-We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}
+We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}.
 
 \begin{figure}[h!]
 \centering
@@ -182,8 +182,13 @@ All of this is illustrated in figure \ref{fig:res}.
 
 \subsection{Comparison to HBase}
 
-Peiran
+HBase is a column-oriented scalable distributed database built on top of Hadoop file system. Tables in Hbase are split into regions served by different region servers. If the size of a region is beyond the configurable threshold, master server will handle load balancing by shifting the regions from over occupied servers to less busy servers. 
 
+Data in each table are sorted by row-key. A table consists of multiple Column Families (CF), and each column belongs to a specific CF. The cross point of row and column is defined as ``cell''  in HBase with its assigned timestamp. These above storage structures make HBase suitable for supporting fast random access (read/write) to huge amount of semi-structured and structured data. 
+
+However, HBase does not natively support spatial data processing. Because, spatial data typically is based on 2-D or 3-D coordinates. Row-key in HBase only supports one-dimentional access to stored data. The way to make it possible for processing spatial data queries is to transform multidimensional coordinates into a one-dimensional string. Such pratical implementations including Geohash,\cite{geohash} Hilbert space-filling curve,\cite{hilbert}  and Grid spatial index method.\cite{grid} Apparently, they all require complex pre-processing of raw spatial data, which is a tedious and time-consuming procedure. 
+
+In order to make a fair comparison, we use a simple way, SingleColumnValueFilter supported by HBase, to perform our random range query. Our experimental result is presented in figure 5. Here, we compared the average latency performance of SpatialTable and HBase based on varied number of rows in database. Naturally, as the growth in the size of rows, average latency of two databases is increasing. However, HBase suffers severely from the increased database size. While, SpatialTable has a almost flat performance. It indicates that SpatialTable will far better outperform HBase with even larger database size.
 
 \begin{figure}[h]
 \centering
@@ -192,7 +197,7 @@ Peiran
 \label{fig:hb}
 \end{figure}
 
-See figure \ref{fig:hb}.
+
 
 \subsection{Comparison to MongoDB with GeoHash}
 
@@ -385,6 +390,24 @@ Daniel Speyer did the basic design; wrote the framework, fundamental operations,
   OSDI.
   2006
 
+\bibitem{geohash}
+  Dimiduk, Nick, et al.
+  \emph{HBase in action.}
+   Shelter Island: Manning.
+   2013
+
+\bibitem{hilbert}
+  Li, Qingcheng, et al.
+  \emph{Optimizational Method of HBase Multi-dimensional Data Query Based on Hilbert Space-Filling Curve.}
+   P2P, Parallel, Grid, Cloud and Internet Computing (3PGCIC), 2014 Ninth International Conference on. IEEE.
+   2014.
+
+\bibitem{grid}
+  Zhang, Ningyu, et al. 
+  \emph{HBaseSpatial: A Scalable Spatial Data Storage Based on HBase.}
+   Trust, Security and Privacy in Computing and Communications (TrustCom), 2014 IEEE 13th International Conference on. IEEE.
+   2014. 
+   
 \bibitem{mongospatial1}
   \emph{MongoDB Manual: 2d Index Internals.}
   \url{http://docs.mongodb.org/manual/core/geospatial-indexes/}
