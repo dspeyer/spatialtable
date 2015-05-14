@@ -13,7 +13,7 @@
 \author{Daniel Speyer\\dls2192 \and Samuel Lee\\hsl2113 \and Peiran Hu\\ph2439}
 \title{SpatialTable: A Distributed Database for Multidimensional Queries}
 
-\pretolerance=8000
+\pretolerance=9000
 
 
 \maketitle
@@ -231,7 +231,8 @@ For most practical geospatial tasks, geohashing is a good solution.  It is fast,
 \subsection{High Resolution}
 
 \subsubsection{High Resolution Geospatial}
-Sam
+
+The resolution of geohashing is sufficient for human-sized objects and gps-resolution locations.  Many ``smart city'' projects propose higher precision.  One approach being prototyped involves sensors a few centimeters in size embedded in sidewalk tiles recording microclimate and traffic information.\cite{nice}  A more ambitious approach is to access all security cameras and merge them into a single image.\cite{camera}  In this case, the resolution would be the pixel's size from the camera: highly variable but often submilimeter.  Thus far these proposals are limited to cities, but unifying all data across large regions, such as the United States, seems inevitable.
 
 \subsubsection{Power Laws in Abstract Spaces}
 
@@ -432,6 +433,19 @@ Daniel Speyer did the basic design; wrote the framework, fundamental operations,
   \emph{MongoDB Manual: GeoSpatial Tutorials}
   \url{http://docs.mongodb.org/manual/tutorial/build-a-2d-index/}
   2015
+
+\bibitem{nice}
+  Lange.
+  \emph{The ``Connected Boulevard'': Taking the Fast Lane to the Internet of Everything.}
+  Cisco Press Release.
+  \url{http://blogs.cisco.com/government/intelligent-communities-global-blog-series-the-connected-boulevard-taking-the-fast-lane-to-the-internet-of-everything}
+  2013
+
+\bibitem{camera}
+  Calavia et al.
+  \emph{A Semantic Autonomous Video Surveillance System for Dense Camera Networks in Smart Cities.}
+  Sensors.
+  2012
 
 \bibitem{powlaw}
   Penneck et al.
