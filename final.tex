@@ -257,7 +257,7 @@ There are circumstances under which the 99th percentile performance is more impo
 
 For a less dramatic example, consider a web service with numerous backends.  Each user query results in parallel queries to all the backends.  The user-perceived latency is determined by the slowest backend.  Even if the queries are in sequence, the anomalously slow ones will account for a large fraction of the total time spent.
 
-There are also psychological reasons to focus on bad-case latencies for any user-facing system.  Intermittent very bad experiences cause more user aggravation than consistently mediocre ones.\cite{needed}  Furthermore, if a handful of users have very bad experiences, those users are likely to be the most vocal, shaping the service's reputation.  Perhaps it is for these reasons that Amazon measures all latencies at the 99.9th percentile\cite{amazon}.
+There are also psychological reasons to focus on bad-case latencies for any user-facing system.  Intermittent very bad experiences cause more user aggravation than consistently mediocre ones.\cite{psych}  Furthermore, if a handful of users have very bad experiences, those users are likely to be the most vocal, shaping the service's reputation.  Perhaps it is for these reasons that Amazon measures all latencies at the 99.9th percentile\cite{amazon}.
 
 \section{Production Readiness}
 
@@ -467,6 +467,11 @@ Samet, Nadav
   Nucleic Acids Research.
   2009
 
+\bibitem{psych}
+Dornic, Stan, and Tarja Laaksonen. 
+\emph{Continuous noise, intermittent noise, and annoyance.} 
+Perceptual and Motor Skills 68.1
+1989
 
 \bibitem{amazon}
   DeCandia et al.
