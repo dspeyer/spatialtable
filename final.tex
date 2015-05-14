@@ -2,10 +2,11 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{stfloats} 
 \usepackage{graphicx}
-\usepackage[superscript,biblabel,space]{cite}
+\usepackage[superscript,biblabel]{cite}
 \usepackage{url}
 \usepackage[font={small},margin={.2in},labelfont+={it}]{caption}
 \usepackage{subcaption}
+\usepackage{flushend}
 \twocolumn
 \flushbottom
 \begin{document}
@@ -38,7 +39,7 @@ There exist many single-node spatial databases, mostly based on rtrees\cite{rtre
 
 \begin{figure}[b!]
 \centering
-\includegraphics[width=3in]{geohash}
+\includegraphics[width=3.2in]{geohash}
 \caption{A 4th degree z curve, showing two queries and their respective linearizations.  The blue query has only 50\% overhead, whereas the green has over 30x}
 \label{fig:z}
 \end{figure}
@@ -226,9 +227,16 @@ For most practical geospatial tasks, geohashing is a good solution.  It is fast,
 
 \subsubsection{High Resolution Geospatial}
 Sam
+
+\subsubsection{Power Laws in Abstract Spaces}
+
+Power law distributions are extremely common in nature for nonspatial properties.  For example, websites have power law distributions for both traffic and inbound links (or, when they don't, it's close enough to that for our purposes)\cite{powlaw}.  If one wanted to keep a database of these and query it by combinations of those, SpatialTable would be well suited.  Geohashing would not be an option, both because the highest possible traffic would not be known in advance, and because the most popular websites' traffic exceeds the distinctions of interest among the less popular by more than $2^{26}$.
+
 \subsection{Higher Dimensional}
 
 \subsubsection{Geospatialtemporal}
+
+The simplest reason to expand beyond two dimensions is to add time.  One might create a photo collation system that noted both the location and the date on which the photo was taken.  These are, after all, common search criteria and included by default in most cameras' exif data.  If the most common search pattern included ranges of both place and time, a three dimensional database would be the ideal backend. 
 
 \subsubsection{DNA ngrams}
 
@@ -250,13 +258,66 @@ There are also psychological reasons to focus on bad-case latencies for any user
 
 \subsection{As a Stand Alone}
 
+Converting SpatialTable from a proof-of-concept to a deployable system would require several changes, all of which can be copied with minimal changes from Bigtable or other existing tablet-based distributed databases.
+
 \subsubsection{Write ahead Logging}
 
-\subsubsection{Handling Metadata Timeouts}
+At present, writes to SpatialTable complete when the data is in RAM of the relevant tabletserver, and the data will be written to permanent storage when the tabletserver unloads that tablet.  This is clearly not the robustness standard production databases aspire to.
+
+So long as we maintain the principle that all data being served is in RAM in rtrees, managing logging is straightforward.  Each write can be appended to a log as well as updated in RAM.  The log would then be loadable as easily as a saved tablet.  When actually unloading a tablet, we could order the log for optimal loading (something we do not currently do).
+
+Note that in this case the log might contain insertion and deletion events for the same rows.  These could be removed in periodic compactions, or we could just wait for unload.
 
 \subsubsection{Catching Dropped Tablets}
 
+At present, we assume all tablet management operations succeed.  To be production-ready, we must handle scenarios in which the tablets loaded, the metadata table and the tablets in persistent storage disagree.
+
+The tablets in persistent storage must be the ultimate authority.  The tablets loaded can always be lost in a server crash, and the metadata can be reconstructed from the tablets but not vice verse.
+
+The balancer already makes regular surveys of which servers have loaded which tablets, so it seems well-placed to check for errors.  At the same time that it sends those RPCs, it can also read all metadata tables and check all persistent storage.
+
+If the balancer notices a tablet with no metadata, it can simply instruct the least loaded server to load that tablet.  That tabletserver will then create the necessary metadata.
+
+If the balancer notices a tablet which is not loaded on the server the metadata says it should be, it should instruct that server to load it.  If the server is already in the process of loading, unloading or splitting the tablet, the lock on the tablet name will be held and the tabletserver can return an appropriate error code.
+
+If a tabletserver continues to return error codes for an excessive time, or times out the load or list request, the balancer can kill it.  The tablets will now be held by a nonexistent tabletserver.
+
+If the balancer notices a tablet which is held by a nonexistent tabletserver, it can erase that metadata line and issue a load as if the tablet had no metadata.
+
+No tabletserver should ever hold a tablet which the metadata does not list as belonging to it.  If the balancer ever observes this, it should kill the tabletserver and file a bug report.
+
 \subsubsection{Discovery and Partition-Resistance}
+
+Several steps in the dropped tablet process assume the balancer can always talk to all servers, and that there is exactly one balancer.  These invariants must be enforced.  The classic solution for this is paxos.  Maintaining a solitary canonical balancer is a straightforward application.  For ensuring connectivity, either a system of tabletserver locks can be used as bigtable does or the tabletservers can directly depend on receiving messages from the balancer.  In the latter case, the tabletservers should check paxos on startup to find the address of the current balancer and then inform it of their existence.  If a tabletserver does not hear from the balancer for some time (perhaps ten seconds) it should recheck paxos to see if the balancer has moved, and introduce itself to the new balancer if necessary.  If it still does not hear, it should kill itself.
+
+As a side effect, either the tabletserver locks in paxos or the introductions to the balancer will provide a way to find a list of all active tabletservers.  This is currently hardcoded.  In addition to being used by the balancer, this list can be used to find a server to send table-create requests to.
+
+\subsubsection{Handling Metadata Timeouts}
+
+At present, when splitting a tablet, a tabletserver first performs the split, then removes the old tablet from the metadata, then inserts the new ones.  These metadata operations involve sending RPCs to whichever tabletserver is holding the relevant metadata tablet.  If those RPCs fail or timeout (perhaps because the metadata tablet was moved at exactly the wrong time) the tabletserver prints an error message and continues, causing database corruption.  Several changes are needed to make this robust.
+
+First, failures should be retried after reasonable backoffs.  This still does not guarantee success, but it greatly decreases the frequency of failures.
+
+In order to ensure a valid table can always be reconstructed, the order of operations becomes quite complex:
+
+\begin{itemize}
+\setlength\itemsep{0em}
+\item Create the new tablets
+\item Write a note to persistent storage indicating that the new tablets aren't real
+\item Write the new tablets to persistent storage
+\item Atomically replace the note in persistent storage with one indicating the old tablet isn't real
+\item Remove the tablet from the list of tablets loaded
+\item Remove the tablet from the metadata table
+\item Delete the old tablet's persistent storage (this step could be moved to an asynchronous garbage collector)
+\item Add the new tablets to the metadata table
+\item Add the new tablets to the list of tablets loaded
+\end{itemize}
+
+This ensures that there is always one correct table structure which can be reconstructed from persistent storage, and that the tablets will never be seen as dropped (unless the server crashes, and they actually are).
+
+\subsubsection{Tablet Naming}
+
+At present, tablets are addressed using textual names which are themselves human-readable descriptions of their boundaries.  This is very convenient for debugging, but risks name collisions for small tablets.  The human-readability is probably worth keeping, but a robust system would need a textualization that guaranteed different strings for different IEEE-754 values.
 
 \subsubsection{Security}
 Sam
@@ -273,7 +334,12 @@ What we each did in this section.
 \subsection{Sam}
 
 \subsection{Daniel}
+
+Daniel Speyer did the basic design; wrote the framework, fundamental operations, tablet-finding code, splitter and client; and devised the test datasets.  He also provided general support to the other team members in their tasks.
+
 \section{References}
+
+\raggedright
 
 \begin{thebibliography}{99}
 
@@ -329,6 +395,12 @@ What we each did in this section.
   \emph{MongoDB Manual: GeoSpatial Tutorials}
   \url{http://docs.mongodb.org/manual/tutorial/build-a-2d-index/}
   2015
+
+\bibitem{powlaw}
+  Penneck et al.
+  \emph{Winners don't take all: Characterizing the competition for links on the web.}
+  PNAS.
+  2001
 
 \bibitem{dna}
   Sun et al.
