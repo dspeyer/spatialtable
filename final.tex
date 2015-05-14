@@ -19,7 +19,7 @@
 \maketitle
 
 \begin{abstract}
-Both spatial databases and distributed databases have proved useful for a variety of problems.  Furthermore, it is possible, albeit inelegant, to store spatial data in a nonspatial distributed database by means of Geohashing and this has proved useful as well.  We propose a natively spatial distributed database, and evaluate its performance.  While it is not as performant as the existing best-of-class solution in the most common case, it is superior in several other cases.  Finally, we make the claim that these cases are important, and therefore that natively spatial distributed databases are worth pursuing.
+Both spatial databases and distributed databases have proved useful for a variety of problems.  Furthermore, it is possible, albeit inelegant, to store spatial data in a nonspatial distributed database by means of Geohashing and this has proved useful as well.  We propose a natively spatial distributed database, prototype it, and evaluate its performance.  While it is not as performant as the existing best-of-class solution in the most common case, it is superior in several other cases.  Finally, we make the claim that these cases are important, and therefore that natively spatial distributed databases are worth pursuing.
 \end{abstract}
 
 \section{Introduction}
@@ -46,7 +46,7 @@ There exist many single-node spatial databases, mostly based on rtrees\cite{rtre
 
 Geohashing allows 2-dimensional data to be mapped to a one dimensional key with some locality preserved.  Conceptually, a finite fractal ``z'' shape is drawn over the space, and every point in the space is mapped to the closest point on the fractal.  Note that this requires both the range and precision of the data to be known at index-construction time.  The distance along the fractal provides a scalar descriptor of the location.  This can be used as a primary key in a classic distributed database.\cite{gh}
 
-A query in 2-space can then be translated into an approximate query in z-space.  Given a box, it is computationally straightforward to find the first and last points along the z-curve that are inside the box.  Then all points inside the box must also have z values between those two points.  Not all values between those points must be inside the box, but for most queries, most of them will be.  Specifically, the expected overhead grows logarithmically in the size of the total database\cite{ghs}.  This is illustrated in figure \ref{fig:z}. A database can then scan between the points and filter for being inside the box, with good expected (but poor worst-case) efficiency.
+A query in 2-space can then be translated into an approximate query in z-space.  Given a box, it is computationally straightforward to find the first and last points along the z-curve that are inside the box.  Then all points inside the box must also have z values between those two points.  Not all values between those points must be inside the box, but for most queries, most of them will be.  Specifically, the expected overhead grows logarithmically in the size of the total database\cite{ghs}.  A database can then scan between the points and filter for being inside the box, with good expected (but poor worst-case) efficiency.  This is illustrated in figure \ref{fig:z}.
 
 \subsection{Hyperspace Hashing}
 
