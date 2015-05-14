@@ -335,11 +335,20 @@ Implementing our database on top of an existing project would certainly require 
 
 \subsubsection{Per-Table Metadata}
 
+A bigger difference between SpatialTable and traditional distributed databases is that SpatialTable has separate metadata tables for each data table.  This is necessary because tables can be of varying dimensions.  Even tables of the same dimension cannot easily share metadata tables as there is no spatial equivalent to prepending table names to keys.
+
+Finding relevant tablets is a spatial-specific task that would simply involve spatial code, but every other task that uses metadata (such as iterating over all tablets to ensure they are loaded) would need to be altered to support both traditional and per-table metadata.
+
+Also, a traditional distributed database only needs a single md0 tablet whose location bootstraps all access.  A single hostport can be stored in paxos or other expensive storage without trouble.  Permitting this for every table is probably acceptable, but the costs should be monitored.  If they prove too high, another layer of indirection is needed.  This comes at a latency cost, but perhaps caching can alleviate it.
+
 \subsubsection{Protocol}
+
+The protocols spoken by existing distributed database are not designed for spatial data.  All bitstring primary keys will need to be replaced with lists of pairs.  If the protocol was designed for extensibility, this may be possible with minimal disruption.
 
 \section{Roles}
 What we each did in this section.
 \subsection{Peiran}
+Peiran Hu was responsible for testing stuff about HBase and MongoDB. She figured out the storage mechanisms and query methods in HBase and MongoDB. She wrote the test cases about 2-D spatial data queries for Starbuck shops through Java Client API for both of the databases.
 
 \subsection{Sam}
 Sam Lee built all of the infrastructure needed to implement our database, and also installed all of the databases used for comparison. He also wrote the basic HDFS access code, and the tablet balancer process.
