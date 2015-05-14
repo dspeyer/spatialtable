@@ -19,7 +19,7 @@
 \maketitle
 
 \begin{abstract}
-Both spatial databases and distributed databases have proved useful for a variety of problems.  Furthermore, it is possible, albeit inelegant, to store spatial data in a nonspatial distributed database by means of Geohashing and this has proved useful as well.  We propose a natively spatial distributed database, prototype it, and evaluate its performance.  While it is not as performant as the existing best-of-class solution in the most common case, it is superior in several other cases.  Finally, we make the claim that these cases are important, and therefore that natively spatial distributed databases are worth pursuing.
+Both spatial databases and distributed databases have proved useful for a variety of problems.  Furthermore, it is possible, albeit inelegant, to store spatial data in a nonspatial distributed database by means of geohashing and this has proved useful as well.  We propose a natively spatial distributed database, prototype it, and evaluate its performance.  While it is not as performant as the existing best-of-class solution in the most common case, it is superior in several other cases.  Finally, we make the claim that these cases are important, and therefore that natively spatial distributed databases are worth pursuing.
 \end{abstract}
 
 \section{Introduction}
@@ -66,7 +66,7 @@ Our design is largely inspired by Google's Bigtable\cite{bigtable}. Like Bigtabl
 
 Our system is intended as a proof-of-concept, not a production-ready system. As such, we do not support true statelessness as bigtable does, but store data in RAM and write to hdfs eventually. As such, we are not robust against node failures, but the technologies of write-ahead logging and compactions are already well-established, and we would discover nothing new by re-implementing them.
 
-We did consider implementing our system as an add-on to hbase (an existing open source distributed database) but the codebase there was too large and insufficiently documented, so this was not practical.
+We did consider implementing our system as an add-on to HBase (an existing open source distributed database) but the codebase there was too large and insufficiently documented, so this was not practical.
 
 In a later section, we discuss both what would be necessary to render our system production-ready, and what would be necessary to merge it with an existing database.
 
@@ -135,7 +135,7 @@ Since we were already using Boost Geometry to implement our tablets, it was natu
 
 \subsubsection{Protobuf}
 
-We use Google Protobuf\cite{protobuf} for our wire serialization needs. This is the same library used by hbase and many other distributed systems, so we have a degree of compatibility there.
+We use Google Protobuf\cite{protobuf} for our wire serialization needs. This is the same library used by HBase and many other distributed systems, so we have a degree of compatibility there.
 
 \subsubsection{RPCZ}
 
@@ -155,7 +155,7 @@ Unfortunately, it uses a naive round-robin thread scheduler which can cause it t
 
 \subsection{Description of the Benchmarks}
 
-We do all our benchmarking using queries, because other operations might not be a fair test.  Spatialtable accepts an insertion as soon as the data is in RAM.  Other systems might wait for confirmation from the storage layer.  That would take considerably longer, but not reflect an advantage of our system.
+We do all our benchmarking using queries, because other operations might not be a fair test.  SpatialTable accepts an insertion as soon as the data is in RAM.  Other systems might wait for confirmation from the storage layer.  That would take considerably longer, but not reflect an advantage of our system.
 
 We generate random data using 5 gaussians, spread uniformly across the range $(0,1)$ with $\sigma=0.1$ in all dimensions.  A heatmap of the resulting data is shown in figure \ref{fig:hm}.
 
@@ -182,11 +182,11 @@ All of this is illustrated in figure \ref{fig:res}.
 
 \subsection{Comparison to HBase}
 
-HBase is a column-oriented scalable distributed database built on top of Hadoop file system. Tables in Hbase are split into regions served by different region servers. If the size of a region is beyond the configurable threshold, master server will handle load balancing by shifting the regions from over occupied servers to less busy servers. 
+HBase is a column-oriented scalable distributed database built on top of Hadoop file system. Tables in HBase are split into regions served by different region servers. If the size of a region is beyond the configurable threshold, master server will handle load balancing by shifting the regions from over occupied servers to less busy servers. 
 
 Data in each table are sorted by row-key. A table consists of multiple Column Families (CF), and each column belongs to a specific CF. The cross point of row and column is defined as ``cell''  in HBase with its assigned timestamp. These above storage structures make HBase suitable for supporting fast random access (read/write) to huge amount of semi-structured and structured data. 
 
-However, HBase does not natively support spatial data processing. Row-key in HBase only supports one-dimentional access to stored data. It is possible to layer Geohash,\cite{geohash} or similar technologies (Hilbert space-filling curve\cite{hilbert} or Grid spatial index method\cite{grid}) on top of HBase, but these are not well-supported.
+However, HBase does not natively support spatial data processing. Row-key in HBase only supports one-dimentional access to stored data. It is possible to layer geohash,\cite{geohash} or similar technologies (Hilbert space-filling curve\cite{hilbert} or Grid spatial index method\cite{grid}) on top of HBase, but these are not well-supported.
 
 Rather than attempt to install additional layers on top of HBase, we saved geohashing for MongoDB and used HBase's native filtering system: SingleColumnValueFilter. Our experimental result is presented in figure 5. Here, we compared the average latency performance of SpatialTable and HBase based on varied number of rows in database. Naturally, as the growth in the size of rows, average latency of two databases is increasing. However, HBase suffers severely from the increased database size. While, SpatialTable has a almost flat performance. It indicates that SpatialTable will far better outperform HBase with even larger database size.
 
@@ -204,12 +204,12 @@ Rather than attempt to install additional layers on top of HBase, we saved geoha
 MongoDB is a popular open-source distributed database with built in geospatial support via geohashing.\cite{mongospatial1,mongospatial2}  This makes it a natural choice for a comparison.  We compared MongoDB to SpatialTable using 100k rows and the same multigaussian distribution as before.
 
 
-Mongo is approximately 5ms faster than Spatialtable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
+Mongo is approximately 5ms faster than SpatialTable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th SpatialTable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
 
 \begin{figure}[h]
 \includegraphics[width=1.55in]{st_mongo}
 \includegraphics[width=1.55in]{st_mongo_cumu}
-\caption{MongoDB vs Spatialtable Drawn from 100k Rows (a) Individual Requests by Rows Returned; (b) Cumulative Histogram for Requests Returning 1000-1500 Rows }
+\caption{MongoDB vs SpatialTable Drawn from 100k Rows (a) Individual Requests by Rows Returned; (b) Cumulative Histogram for Requests Returning 1000-1500 Rows }
 \label{fig:mongo}
 \end{figure}
 
@@ -226,13 +226,13 @@ With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure
 
 \subsection{Theoretical Comparison to Hyperdex}
 
-Hyperdex is an implementation of Hyperspace Hashing -- the existing technology truly distinct from Geohashing.  Unfortunately, we were not able to make it work.  Even simple queries produced undocumented errors from deep in its internals.
+HyperDex is an implementation of hyperspace hashing -- the existing technology truly distinct from geohashing.  Unfortunately, we were not able to make it work.  Even simple queries produced undocumented errors from deep in its internals.
 
-We can, however, note that to support range queries, Hyperspace Hashing must use ``order preserving hashes''.  Combined with its static assignment of regions, this ensures it will fail dramatically in the power law distribution case.  Not only will its hashing contribute nothing, but it will store the vast majority of data on a single node.  If this traffic causes that node to fail, the database will become essentially unavailable.
+We can, however, note that to support range queries, hyperspace hashing must use ``order preserving hashes''.  Combined with its static assignment of regions, this ensures it will fail dramatically in the power law distribution case.  Not only will its hashing contribute nothing, but it will store the vast majority of data on a single node.  If this traffic causes that node to fail, the database will become essentially unavailable.
 
 \section{Applications}
 
-For most practical geospatial tasks, geohashing is a good solution.  It is fast, well-suited to gps data on the surface of the Earth, and robustly implemented.  Nevertheless, it suffers from three issues: fixed resolution, strict two dimensionality and high outliers.  We believe there are cases in which these issues are important enough to justify the use of a Spatialtable-like solution instead.
+For most practical geospatial tasks, geohashing is a good solution.  It is fast, well-suited to gps data on the surface of the Earth, and robustly implemented.  Nevertheless, it suffers from three issues: fixed resolution, strict two dimensionality and high outliers.  We believe there are cases in which these issues are important enough to justify the use of a SpatialTable-like solution instead.
 
 \subsection{High Resolution}
 
@@ -338,7 +338,7 @@ In terms of security there are a few threats that are most common to the integri
 In the case of authentication, we believe we can make use of industry standard methods to hash passwords in a secure store, and also implement strict password requirements. To prevent excessive privilege abuse, we would have to make sure that our database can operate in a way that our users receive only enough privilege to access only what they must. This means that we will not default to giving all users complete access to all database data, and implement different levels of access to allow finer granular control of privileges. Again, there are industry standard practices that have benefitted from years of research and development, that we would try to leverage in our implementation. The same care would go into preventing denial of service attacks, and the safe backup of database data.
 
 \subsection{As Part of an Existing Database}
-Implementing our database on top of an existing project would certainly require us to gain intimate knowledge about the inner workings of their data structures and methods. It would certainly be a considerate time commitment that was too long for us to undertake this semester, and thus inspired us to develop our own solution. However, there are some aspects of typical implementations that are well known and established that we could leverage, particularly the writing of the database log and compaction to persistent storage. It is definitely feasible to use for example the way Hbase writes their log and compacts their data, and have the same procedures write our data structures and log to persistent storage. Again, although it seems that there are certain aspects of currently available database systems that we can leverage, overall our design is sufficiently different that would hinder a total integration without a substantial rewrite of our codebase.
+Implementing our database on top of an existing project would certainly require us to gain intimate knowledge about the inner workings of their data structures and methods. It would certainly be a considerate time commitment that was too long for us to undertake this semester, and thus inspired us to develop our own solution. However, there are some aspects of typical implementations that are well known and established that we could leverage, particularly the writing of the database log and compaction to persistent storage. It is definitely feasible to use for example the way HBase writes their log and compacts their data, and have the same procedures write our data structures and log to persistent storage. Again, although it seems that there are certain aspects of currently available database systems that we can leverage, overall our design is sufficiently different that would hinder a total integration without a substantial rewrite of our codebase.
 
 \subsubsection{Per-Table Metadata}
 
