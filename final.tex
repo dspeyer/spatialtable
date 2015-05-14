@@ -6,7 +6,7 @@
 \usepackage{url}
 \usepackage[font={small},margin={.2in},labelfont+={it}]{caption}
 \usepackage{subcaption}
-\usepackage{flushend}
+%\usepackage{flushend}
 \twocolumn
 \flushbottom
 \begin{document}
@@ -206,21 +206,21 @@ MongoDB is a popular open-source distributed database with built in geospatial s
 
 Mongo is approximately 5ms faster than Spatialtable in the median case, but suffers from high outliers.   At the 95th percentile, performance is roughly even, and at the 99th Spatialtable is almost 20ms faster.  This is shown in more detail in figure \ref{fig:mongo}.
 
-\begin{figure}[h]
+\begin{figure}[b!]
 \includegraphics[width=1.55in]{st_mongo}
 \includegraphics[width=1.55in]{st_mongo_cumu}
 \caption{MongoDB vs Spatialtable Drawn from 100k Rows (a) Individual Requests by Rows Returned; (b) Cumulative Histogram for Requests Returning 1000-1500 Rows }
 \label{fig:mongo}
 \end{figure}
 
-These outliers are exactly what we expect from geohashing in general.  We also expect that a distribution with many points concentrated below the resolution will cause problems.  To trigger this, we reran the test using an exponential distribution.  Each co-ordinate's base 10 log was drawn from a uniform distribution of (-9,9).  We placed the high-density point at the origin to prevent floating point underflow.
+These outliers are exactly what we expect from geohashing in general.  We also expect that a distribution with many points concentrated below the resolution will cause problems.  To trigger this, we reran the test using an power law distribution.  Each co-ordinate's base 10 log was drawn from a uniform distribution of (-9,9).  We placed the high-density point at the origin to prevent floating point underflow.
 
-With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure \ref{fig:mongoexp}.  The exact nature of this pattern is unclear, but to a first approximation for 38\% of queries the geohashing system worked well, while for the rest it hit resolution issues.  For queries which returned between 1000 and 1500 rows, only 21\% worked well.  The exact numbers are not important, as they are an effect of the exact data chosen, but the lesson is clear: geohashing does not cope well with exponentially distributed data.
+With this dataset, we saw a sharp multimodality of MongoDB latencies (see figure \ref{fig:mongoexp}).  The exact nature of this pattern is unclear, but to a first approximation for 38\% of queries the geohashing system worked well, while for the rest it hit resolution issues.  For queries which returned between 1000 and 1500 rows, only 21\% worked well.  The exact numbers are not important, as they are an effect of the exact data chosen, but the lesson is clear: geohashing does not cope well with power-law-distributed data.
 
 \begin{figure}[h]
 \includegraphics[width=1.55in]{st_mongo_exp}
 \includegraphics[width=1.55in]{st_mongo_exp_cumu}
-\caption{The same graphs as figure \ref{fig:mongo}, but with an exponential distribution of rows}
+\caption{The same graphs as figure \ref{fig:mongo}, but with an power law distribution of rows}
 \label{fig:mongoexp}
 \end{figure}
 
