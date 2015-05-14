@@ -326,7 +326,7 @@ At present, tablets are addressed using textual names which are themselves human
 
 \subsubsection{Security}
 
-In terms of security there are a few threats that are most common to the integrity of the database, in no particular order they include, excessive privilege abuse, privilege elevation, denial of service, weak authentication, backup data exposure, and weak database communication protocol vulnerabilities. These have all been previously addressed in commercial database and we can certainly learn from their implementations. 
+In terms of security there are a few threats that are most common to the integrity of the database, in no particular order they include, excessive privilege abuse, privilege elevation, denial of service, weak authentication, backup data exposure, and weak database communication protocol vulnerabilities\cite{security}. These have all been previously addressed in commercial database and we can certainly learn from their implementations. 
 
 In the case of authentication, I believe we can make use of industry standard methods to hash passwords in a secure store, and also implement strict password requirements. To prevent excessive privilege abuse, we would have to make sure that our database can operate in a way that our users receive only enough privilege to access only what they must. This means that we will not default to giving all users complete access to all database data, and implement different levels of access to allow finer granular privileges. Again, there are industry standard practices that have benefitted from years of research and development, that we would try to leverage in our implementation. The same care would go into preventing denial of service attacks, and the safe backup of database data.
 
@@ -473,6 +473,12 @@ Samet, Nadav
   \emph{Dynamo: Amazon’s Highly Available Key-value Store.}
   Symposium on Operating Systems Principles.
   2007
-  
+
+\bibitem{security}
+Horwath, Jim
+\emph{Setting Up a Database Security Logging and Monitoring Program}
+SANS Institute Reading Room
+2012
+
 \end{thebibliography}
 \end{document}
